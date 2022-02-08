@@ -88,4 +88,7 @@ FOR userB in similarUsers
 </script>
 
 <style scoped>
+pre {
+      white-space: pre-wrap; /* CSS3 */
+}
 </style>

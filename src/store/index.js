@@ -77,6 +77,10 @@ An interesting fact that makes you want to cli...`,
       commit('queryInfo', 0)
       axios({
         url: 'http://localhost:8529/_db/movie-demo/ml-demo',
+        auth: {
+          username: "root",
+          password: "openSesame"
+        },
         method: 'post',
         data: {
           query: `

@@ -18,8 +18,8 @@
         <Button type="button" icon="pi pi-minus" title="Remove Column" @click="removeColumn" :disabled="columns.length === 1" /> -->
 
         <div style="margin-top: .5em" class="p-grid user-row">
-                <div v-for="col of 10" :key="col" class="p-col">
-                    <Button v-on:click="updateUser(col)" class="user-button" :class="col == user ? 'selectedButton' : ''" icon="pi pi-user" :label="'User ' + col" />
+                <div v-for="u, index of users" :key="index" class="p-col userButtonDiv">
+                  <Button  v-on:click="updateUser(index+1)" class="user-button" :class="index+1 == user ? 'selectedButton' : ''" ><i class="pi pi-user"></i><p>{{u}}</p></Button>
                 </div>
         </div>
   </div>
@@ -35,13 +35,24 @@ export default {
   },
   data() {
     return {
+      users: [
+        "Arthur",
+        "Rajiv",
+        "Alex",
+        "Naomi",
+        "Grace",
+        "Oliver",
+        "Mathias",
+        "Lupen"
+      ],
+      colors: []
     }
   },
   computed: {
     ...mapState({
       user: state => state.user,
       currentQuery: state => state.currentQuery
-    })
+    }),
   },
   methods: {
       addColumn() {
@@ -57,6 +68,17 @@ export default {
       recommendMoviesEmbeddingML: 'recommendMoviesEmbeddingML',
       updateUser: 'updateUser'
       }),
+      generateRandomColor(){
+      let maxVal = 0xFFFFFF; // 16777215
+      let randomNumber = Math.random() * maxVal; 
+      randomNumber = Math.floor(randomNumber);
+      randomNumber = randomNumber.toString(16);
+      let randColor = randomNumber.padStart(6, 0);   
+      return `#${randColor.toUpperCase()}`
+    } 
+    },
+  beforeMount() {
+    this.colors.push(this.generateRandomColor())
   },
 }
 </script>
@@ -73,7 +95,13 @@ export default {
 .user-button {
   width: 6em;
   height: 6em;
+  
 }
+.user-button>p::first-letter{
+  font-size: 140%;
+  font-weight: bold;
+}
+
 .selectedButton {
 text-decoration:underline;
 }

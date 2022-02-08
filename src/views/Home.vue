@@ -141,7 +141,7 @@ div.top-panel {
 }
 .bottom-panel-collapsed {
   background-color: var(--surface-a);
-  height: 20vh;
+  height: 23vh;
   margin-top: 2vh;
   transition: width .5s, transform 1s;
   top: 0px;
