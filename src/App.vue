@@ -1,5 +1,7 @@
 <template>
-  <Home />
+<div class="body-wrapper">
+  <Home/>
+</div>
 </template>
 
 <script>
@@ -13,17 +15,18 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
   body {
-      background-color: var(--surface-a);
       color: var(--text-color);
-   }
+      background-color: var(--arangodb-background-b);
+      }
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: var(--text-color);
-  margin-top: 60px;
+  margin-top: 30px;
 }
 </style>

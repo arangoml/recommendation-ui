@@ -17,7 +17,6 @@
     Extraction saucer café au lait crema, pumpkin spice mazagran fair trade java as caffeine. Acerbic, id, bar  caffeine sweet skinny sit skinny.
     </p>
       </transition>
-    <!-- <iframe src="https://gist.github.com/cw00dw0rd/87de0edb135f127bbacb5cab04f7f7bc" frameborder="0"></iframe> -->
   </div>
 </template>
 
