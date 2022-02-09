@@ -1,24 +1,24 @@
 <template>
 <div>
     <div class="card">
-        <Carousel v-for="genre in computedGenres" :name="genre[0]" v-bind:key="genre[0] + genre[1]" :value="filteredRecommendations(genre[0])" :numVisible="4" :numScroll="2" :page=0 :responsiveOptions="responsiveOptions" >
+        <Carousel v-for="genre, index in computedGenres" :name="genre[0]" v-bind:key="index + selectedLanguages.length" :value="filteredRecommendations(genre[0])" :numVisible="4" :numScroll="2" :page=0 :responsiveOptions="responsiveOptions" >
             <template #header>
-                <h5>{{genre[0]}}({{genre[1]}})</h5>
+                <h5>{{genre[0]}}({{filteredRecommendations(genre[0]).length}})</h5>
             </template>
             <template #item="slotProps">
-                <div v-show="slotProps.data.movie.voteAverage >= selectedRating" class="movie-item" :name="slotProps.data.movie.title + genre[0]">
+                <div class="movie-item" :name="slotProps.data.movie.title + genre[0]">
                 <transition name="flip">
                     <div v-show="!slotProps.data.flipped" class="movie-item-content" :class="!slotProps.data.flipped ? 'delete-card' : '' ">
                         <div class="movie-details">
                         <div class="p-mb-3">
                             
-                            <img v-show="slotProps.data.movie.posterPath != null" :src="'https://image.tmdb.org/t/p/w500'+ slotProps.data.movie.posterPath" :alt="slotProps.data.name" class="movie-image" />
-                            <img v-show="slotProps.data.movie.posterPath == null" :src="placeholderImage" :alt="slotProps.data.name" class="movie-image" />
+                            <!-- <img v-show="slotProps.data.movie.posterPath != null" :src="'https://image.tmdb.org/t/p/w500'+ slotProps.data.movie.posterPath" :alt="slotProps.data.name" class="movie-image" /> -->
+                            <img :src="slotProps.data.movie.posterPath == null ? placeholderImage : 'https://image.tmdb.org/t/p/w500'+ slotProps.data.movie.posterPath" :alt="slotProps.data.name" class="movie-image" />
                         </div>
                             <div class="car-buttons p-mt-5">
                                 <Button icon="pi pi-sync" class="p-button p-button-rounded p-mr-2" @click="toggleCard(slotProps.data)"/>
 
-                                <Button icon="pi pi-star-fill" class="p-button-success p-button-rounded p-mr-2" />
+                                <Button icon="pi pi-star-fill" class="p-button-rounded p-mr-2 avocadoButton"> <img class="avocadoButtonImage" src="../assets/adblogo.png" alt="" /> </Button>
                             </div>
                         </div>
                             <h4 class="p-mb-1">{{slotProps.data.movie.title}}</h4>
@@ -33,6 +33,8 @@
                         <div class="car-buttons p-mt-5">
                         <Button icon="pi pi-sync" class="p-button p-button-rounded p-mr-2" @click="toggleCard(slotProps.data)"/>
                         <p>{{slotProps.data.movie.overview}}</p>
+                        <p>Genres: {{slotProps.data.movie.genres}}</p>
+                        <p>Language: {{slotProps.data.movie.originalLanguage}}</p>
                         </div>
 
                         <div class="p-mb-3">
@@ -77,7 +79,8 @@ export default {
           }
         ],
         movies: [],
-        placeholderImage: placeholderImage
+        placeholderImage: placeholderImage,
+        filteredmovies: []
         
     }
   },
@@ -86,6 +89,7 @@ export default {
         recommendations: state => state.recommendations,
         genres: state => state.sortedGenres,
         selectedGenres: state => state.selectedGenres,
+        selectedLanguages: state => state.selectedLanguages,
         computedGenres: function(state) {
           let computedSortedGenres = []
           state.sortedGenres.forEach((genre) => {            
@@ -95,26 +99,35 @@ export default {
         },
         selectedRating: state => state.selectedRating
       }),
-  },
-  props: {
-    genre: Array
-  },
-  methods: {
-    filteredRecommendations: function(genre) {
+    filteredRecommendations: function() {
+      return function(genre){
+        this.filteredmovies = [];
       let movies =[];
+      let filteredRatedMovies = [];
       this.recommendations.forEach((e) => {
         e.movie.genres.find((el) => {
           el.toString() == genre.toString() ? movies.push(e) : ''
         })
         });
-      return movies; 
+
+        movies.forEach((e) => {
+          e.movie.voteAverage >= this.selectedRating + 1 && e.movie.posterPath != null && (this.selectedLanguages.length > 0 ? this.selectedLanguages.find(l => l == e.movie.originalLanguage): true) ? filteredRatedMovies.push(e) : ''
+        })
+        this.filteredmovies = filteredRatedMovies
+      return filteredRatedMovies
+          }
     },
+  },
+  props: {
+    genre: Array
+  },
+  methods: {
+    ...mapActions({
+    recommendMoviesContentBasedML: 'recommendMoviesContentBasedML',
+    }),
     toggleCard: function(movie) {
       movie.flipped = !movie.flipped;
     },
-      ...mapActions({
-      recommendMoviesContentBasedML: 'recommendMoviesContentBasedML'
-      })
       
   },
   created: function() {
@@ -153,4 +166,10 @@ export default {
     opacity: 0;
   
   }
+  .avocadoButtonImage {
+    width: 2vw;
+  }
+.avocadoButton {
+  background-color: rgba(0, 128, 0, 0);
+}
 </style>

@@ -1,0 +1,88 @@
+:root{
+    // Background Colors
+    --arangodb-background-a: #ffffff;
+    --arangodb-background-b: #333333;
+    --arangodb-background-c: #faf8f0;
+
+    // Button Colors: Primary
+    --arangodb-button-color-primary-a: #A3B34F;
+    --arangodb-button-color-primary-b: #86943f;
+
+    // Button Colors: Secondary
+    --arangodb-button-color-secondary-a: #555555;
+    --arangodb-button-color-secondary-b: #464646;
+
+    // Button Colors: Downloads
+    --arangodb-button-color-downloads-a: #DDA532;
+    --arangodb-button-color-downloads-b: #cc8e39;
+
+    // Additional Elements
+    --arangodb-additional-a: #f7f7f7;
+    --arangodb-additional-b: #5e3108;
+
+    // Newsletter / Social icons
+    --arangodb-icons-a: #88a049;
+    --arangodb-icons-b: #cfcf66;
+
+    // Links
+    --arangodb-links-a: #88a049;
+    --arangodb-links-a: #888888;
+
+
+
+
+    --surface-a: var(--arangodb-background-b);
+    --surface-b: var(--arangodb-button-color-primary-a);
+    --surface-border: var(--arangodb-icons-a);
+    --panel-background: #373838fa;
+    --panel-background-some-opacity: #373838de;
+    --panel-background-with-opacity: #373838f8;
+    --primary-text-color: var(--arangodb-background-c);
+    --selected-button: var(--arangodb-button-color-downloads-a);
+    --secondary-button-accent: var(--arangodb-additional-b);
+}
+
+body p {
+    font-size: large;
+}
+
+.p-accordion .p-accordion-header .p-accordion-header-link {
+    color: var(--primary-text-color);
+    background: var(--panel-background);
+    border: 1px solid var(--surface-border);
+  }
+.p-accordion-tab-active {
+    background-color: var(--selected-button);
+}
+.p-accordion-tab-active a .p-accordion-header-link{
+    background-color: var(--selected-button);
+}
+.p-accordion .p-accordion-content {
+    background-color: var(--surface-a);
+}
+.p-divider.p-divider-horizontal:before {
+    border: 1px var(--surface-border);
+}
+.p-divider-vertical.p-divider-solid:before {
+    border-left: 1px var(--surface-border);
+}
+.movie-item .movie-item-content {
+    border: 1px solid var(--surface-border);
+}
+
+.p-button {
+    border: 1px solid var(--surface-border);
+    background-color: var(--surface-b);
+}
+.p-button-icon {
+    color: var(--secondary-button-accent);
+    background-color: (var(--selected-button));
+    
+}
+
+.p-carousel-prev-icon {
+    color: var(--secondary-button-accent);
+    background-color: (var(--selected-button));
+    padding: 4px;
+    border: 1px solid var(--secondary-button-accent);
+}

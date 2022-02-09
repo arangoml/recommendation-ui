@@ -5,8 +5,23 @@ import store from "./store/"
 
 // import 'primevue/resources/themes/lara-dark-purple/theme.css';
 import 'primevue/resources/themes/bootstrap4-dark-blue/theme.css';
+
+// import 'primevue/resources/themes/md-dark-indigo/theme.css';
+// import 'primevue/resources/themes/md-dark-deeppurple/theme.css';
+
+// import 'primevue/resources/themes/mdc-dark-indigo/theme.css';
+// import 'primevue/resources/themes/mdc-dark-deeppurple/theme.css';
+
+// import 'primevue/resources/themes/lara-dark-indigo/theme.css';
+// import 'primevue/resources/themes/lara-dark-teal/theme.css';
+
+
+
+
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
+
+import './styles/styles.scss'
 
 import 'primeflex/primeflex.css';
 import PrimeVue from 'primevue/config';
@@ -25,7 +40,6 @@ import ProgressSpinner from 'primevue/progressspinner';
 
 
 
-
 const app = createApp(App);
 
 app.use(PrimeVue);
@@ -33,6 +47,7 @@ app.use(ToastService);
 app.use(Carousel);
 app.use(store);
 
+// globally (in your main .js file)
 app.component('InputText', InputText);
 app.component('Button', Button);
 app.component('Toast', Toast);

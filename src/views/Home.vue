@@ -1,5 +1,5 @@
 <template>
-  <!-- <transition name="slide-fade"> -->
+  <transition name="slide-fade">
     <div id="parent-grid" class="p-grid nested-grid movie-grid p-jc-center">
       <div v-show="loadingData" class="spinner">
       <ProgressSpinner />
@@ -35,7 +35,7 @@
           />
         </div>
         <transition name="slide-fade">
-          <FilterPanel v-show="showLeftPanel" />
+          <FilterPanel v-show="showLeftPanel" class="filterPanel" />
         </transition>
         <transition name="slide-fade">
           <div v-show="showLeftPanel" v-on:click="toggleLeftPanel">
@@ -54,10 +54,10 @@
         :class="showLeftPanel ? 'p-col-8 p-mx-auto' : 'p-col-10 p-mx-auto'"
       >
         <div class="p-grid">
-          <div class="p-col-12">
+          <div class="p-col-12 userHeader">
             <UserHeader />
           </div>
-          <div class="p-col-12" >
+          <div class="p-col-12 carousel" >
             <CarouselView />
           </div>
           
@@ -74,7 +74,7 @@
         </div>
       </div>
     </div>
-  <!-- </transition> -->
+  </transition>
 </template>
 
 <script>
@@ -134,13 +134,23 @@ export default {
 
 div.top-panel {
   overflow: scroll;
+  background: url("../assets/graphbackgroundlightened2.png") no-repeat right top fixed;
+  background-color: var(--panel-background);
+}
+.carousel {
+  background-color: var(--panel-background);  
+}
+.userHeader {
+  background-color: var(--panel-background-some-opacity);  
 }
 .top-elements {
   height: 70vh;
+  
   overflow: scroll;
+  background-color: var(--panel-background);
 }
 .bottom-panel-collapsed {
-  background-color: var(--surface-a);
+  background-color: var(--panel-background);
   height: 23vh;
   margin-top: 2vh;
   transition: width .5s, transform 1s;
@@ -149,12 +159,12 @@ div.top-panel {
 
 }
 .bottom-panel-expanded {
-  background-color: var(--surface-a);
+  background-color: var(--panel-background);
   height: 70vh;
   margin-top: 29vh;
   z-index: 1 !important;
   position: absolute;
-  border: 2px double var(--surface-d);
+  border: 2px double var(--surface-border);;
   transition: height 1s, width .5s, transform 1s;
   top: 0px;
 }
@@ -165,6 +175,8 @@ div.top-panel {
   width: 88vw !important;
   height: 2vh !important;
   margin-bottom: 1vh;
+  border: 1px solid var(--surface-b) !important;
+  color: var(--surface-b) !important;
 }
 
 .slide-fade-enter-active {
@@ -199,6 +211,12 @@ div.top-panel {
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
+}
+::-webkit-scrollbar:vertical {
+  background-color: var(--panel-background);
+}
+.top-elements::-webkit-scrollbar:horizontal {
+  background-color: var(--panel-background);
 }
 
 /* Track */

@@ -8,52 +8,116 @@ const store = createStore({
   state () {
     return {
       count: 0,
-      actorGraph: [{"query": "AQL Query for the current recommendation"}],
       recommendations: [{movie: 79132, title: "Inception", ratingSum : 158.5}],
       currentQuery: 0,
       queryInfo: [
         {
-          "name": "Analytic Collaborative Filtering",
-          "shortDescription": `A brief line about the recommendation method. 
-An interesting fact that makes you want to cli...`,
+          "name": "AQL Collaborative Filtering",
+          "shortDescription": `Recommendation using collaborative filtering implemented in AQL....`,
           "description": `
-          An in-depth description of analytic collaborative filtering. 
-
-          How useful it is and why you would want to use it. 
+          Recommendation using collaborative filtering implemented in AQL.  
+          The algorithm computes recommendations dynamically given a User ID (user-a).  
           
-          Also, some points for and against it. 
+          The query traverses from  user-a through rating edges to movies and then back to the 
+          other users uses and uses Cosine Simularity to determine the N most similar users (similar-group) to user-a.  
           
-          Perhaps an image describing it as well.
+          Then the query traverses from the similar-group to through rate edges to movies to identify to identify the 
+          most highly rated movies of the similarity-group that have not been rated by user-a and returns this list as the recommendation.
+          `,
+          "aqlQuery":`
+          WITH Movie, User, rates
+          LET similarUsers =
+            (FOR movie, edge IN 1 OUTBOUND  @userId  rates  // eg. userid = Users/1 GRAPH 'movie-knowledge-graph'
+                LET userA_ratings = edge.rating //TO_NUMBER(edge.ratings)
+                FOR userB, edge2 IN 1..1 INBOUND movie rates
+                    FILTER userB._id != @userId
+                    LET userB_ratings = edge2.rating //TO_NUMBER(edge2.ratings)
+                    COLLECT userids=userB._id INTO g KEEP userB_ratings, userA_ratings
+                    LET userA_len   = SQRT(SUM (FOR r IN g[*].userA_ratings RETURN r*r))
+                    LET userB_len   = SQRT(SUM (FOR r IN g[*].userB_ratings RETURN r*r))
+                    LET dot_product = SUM (FOR n IN 0..(LENGTH(g[*].userA_ratings) - 1) RETURN g[n].userA_ratings * g[n].userB_ratings)
+                    LET cos_sim = dot_product/ (userA_len * userB_len)
+                    SORT cos_sim DESC LIMIT @similarUserLimit
+                    RETURN {userBs: userids,
+                          cosine_similarity: cos_sim}
+            )
+        LET userA_RatedMovies = (FOR movie, edge IN 1..1 OUTBOUND @userId rates RETURN movie._key)
+        FOR userB in similarUsers
+            FOR movie ,ratesEdge IN 1..1 OUTBOUND userB.userBs rates 
+                FILTER movie._key NOT IN userA_RatedMovies
+                COLLECT userA_UnratedMovie = movie
+                AGGREGATE ratingSum = SUM(ratesEdge.rating)  
+                SORT ratingSum DESC
+                LIMIT @movieRecommendationLimit
+                RETURN  {movie: userA_UnratedMovie, score : ratingSum} 
           `,
           "queryName": "recommendMoviesCollaborativeFilteringAQL"
         },
         {
-          "name": "2Analytic Collaborative Filtering",
-          "shortDescription": `2A brief line about the recommendation method. 
-An interesting fact that makes you want to cli...`,
-          "description": `2
-          An in-depth description of analytic collaborative filtering. 
+          "name": "ML Embeddings Recommendation",
+          "shortDescription": `This is an implementation using matrix factorization. The model uses Matrix Factorization to compute similarity...`,
+          "description": `
+          This is an implementation using matrix factorization. The model uses Matrix Factorization to compute similarity between movies and similarity between users.
+          
+          An AQL query retrieves user ratings on movies from the Movie Knowledge Graph for machine learning.The similarity between each movie is computed using Matrix Factorization and FAISS to compute the top movie similarities.  The movie similarities are communicated as inferences to the Movie Knowledge Graph as similar movie edges with a similarity score.
 
-          How useful it is and why you would want to use it. 
-          
-          Also, some points for and against it. 
-          
-          Perhaps an image describing it as well.
+          An AQL query then finds the most highly rated movies by the given user (user-a) and then uses the movie similarity inference to compute the set of movies most like the highest rated movies from user-a.
+          `,
+          "aqlQuery": `
+          /*
+This query uses the embedding inference computed using ML and transferred to ArangoDB in similarMovie_Embedding_Inference
+The query works as follows:
+Given a user, what movies are similar to the user's highest rated (topRatedLimit) movies and return the most similar movies the user has not rated.
+*/
+
+LET userRatedMovies = (FOR ratingEdge IN rates FILTER ratingEdge._from == @userId SORT  ratingEdge.rating DESC RETURN PARSE_IDENTIFIER(ratingEdge._to).key)
+    FOR ratingEdge IN rates  
+    FILTER ratingEdge._from == @userId
+    SORT  ratingEdge.rating DESC 
+    LIMIT topRatedMovieLimit 
+    FOR similarMovieEdge IN similarMovie_Embedding_Inference
+        FILTER similarMovieEdge._from == ratingEdge._to
+        LET similarMovie = similarMovieEdge._to
+        FILTER similarMovie NOT IN userRatedMovies //Don't recommend movies already rated
+        //compound score is user rating factor / distance - talk to data scientist on how to do this in amore scientific way
+        LET compoundScore = (ratingEdge.rating/5.0)/similarMovieEdge.distance
+        //Aggregate ratings for duplicate similar movies
+        COLLECT recommendedMovie = similarMovie AGGREGATE aggregateScore = MAX(compoundScore)
+        SORT aggregateScore DESC
+        FILTER DOCUMENT(recommendedMovie)!=null//Temp Work-around while determine cause of nulls
+        LIMIT  movieRecommendationLimit
+        RETURN {movie : DOCUMENT(recommendedMovie) , score : aggregateScore}
           `,
           "queryName": "recommendMoviesContentBasedML"
         },
         {
-          "name": "3Analytic Collaborative Filtering",
-          "shortDescription": `3A brief line about the recommendation method. 
-An interesting fact that makes you want to cli...`,
-          "description": `3
-          An in-depth description of analytic collaborative filtering. 
+          "name": "Content Based ML Recommendations",
+          "shortDescription": `This is an implementation of content-based recommendation.  The model uses TFIDF to compute similarity between....`,
+          "description": `
+          This is an implementation of content-based recommendation.  The model uses TFIDF to compute similarity between movies.
 
-          How useful it is and why you would want to use it. 
-          
-          Also, some points for and against it. 
-          
-          Perhaps an image describing it as well.
+          An AQL query concatenates the  movie title, tagline, and overview from each movie from the Movie Knowledge Graph for machine learning.  The similarity between each movie is computed using TFIDF and FAISS to compute the top movie similarities.
+
+          The movie similarities are communicated as inferences to the Movie Knowledge Graph as similar movie edges with a similarity score.  An AQL query then finds the most highly rated movies by the given user (user-a) and then uses the movie similarity inference to compute the set of movies most like the highest rated movies from user-a.
+          `,
+          "aqlQuery": `
+          WITH Movie
+LET userRatedMovies = (FOR ratingEdge IN rates FILTER ratingEdge._from == @userId SORT  ratingEdge.rating DESC RETURN PARSE_IDENTIFIER(ratingEdge._to).key)
+    FOR ratingEdge IN rates  
+    FILTER ratingEdge._from == @userId
+    SORT  ratingEdge.rating DESC 
+    LIMIT @topRatedMovieLimit 
+    LET similarMovies = DOCUMENT("MovieSimilarityTFIDF",PARSE_IDENTIFIER(ratingEdge._to).key)
+    FILTER similarMovies != null
+    FOR similarMovie IN similarMovies.similarMovies
+        FILTER similarMovie NOT IN userRatedMovies //Don't recommend movies already rated
+        //compound score is user rating factor * TFIDF similar movie score
+        LET compoundScore = similarMovie.score*ratingEdge.rating/5.0 
+        //Aggregate ratings for duplicate similar movies
+        COLLECT recommendedMovie = similarMovie.movie AGGREGATE aggregateScore = MAX(compoundScore)
+        SORT aggregateScore DESC
+        LIMIT  @movieRecommendationLimit
+        RETURN {movie : DOCUMENT("Movie",recommendedMovie) , score : aggregateScore} 
           `,
           "queryName": "recommendMoviesEmbeddingML"
         }
@@ -61,10 +125,12 @@ An interesting fact that makes you want to cli...`,
       topGenres: {},
       sortedGenres: [],
       selectedGenres: [],
+      selectedLanguages: [],
       showLeftPanel: true,
       loadingData: false,
       user: 1,
-      selectedRating: 0
+      selectedRating: 0,
+      languages: []
     }
   },
   getters: {
@@ -92,6 +158,7 @@ An interesting fact that makes you want to cli...`,
                 overview
                 genres
                 voteAverage
+                originalLanguage
               }
               score
             }
@@ -101,8 +168,14 @@ An interesting fact that makes you want to cli...`,
       }).then((result) => {
         commit('loading', true);
         commit('userRecommendationUpdate', result.data.data.recommendMoviesCollaborativeFilteringAQL);
-        commit('updateTopGenres', result.data.data.recommendMoviesCollaborativeFilteringAQL);
         // context.commit('updateGenres', [])
+      })
+      .then(() => {
+        commit('updateTopGenres');
+      })
+      .then(() => {
+        commit('updateAvailableLanguages');
+        
       })
       .then(() => {
         commit('loading', false);
@@ -124,6 +197,7 @@ An interesting fact that makes you want to cli...`,
                 overview
                 genres
                 voteAverage
+                originalLanguage
               }
               score
             }
@@ -132,9 +206,15 @@ An interesting fact that makes you want to cli...`,
         }
       }).then((result) => {
         commit('loading', true);
-        commit('userRecommendationUpdate', result.data.data.recommendMoviesContentBasedML, user ? user : '');
-        commit('updateTopGenres', result.data.data.recommendMoviesContentBasedML);
-      }).then(() => {
+        commit('userRecommendationUpdate', result.data.data.recommendMoviesContentBasedML, user ? user : '');        
+      })
+      .then(() => {
+        commit('updateTopGenres');
+      })
+      .then(() => {
+        commit('updateAvailableLanguages');
+      })
+      .then(() => {
         commit('loading', false);
       })
     },
@@ -153,6 +233,7 @@ An interesting fact that makes you want to cli...`,
                 overview
                 genres
                 voteAverage
+                originalLanguage
               }
               score
             }
@@ -162,70 +243,25 @@ An interesting fact that makes you want to cli...`,
       }).then((result) => {
         commit('loading', true);
         commit('userRecommendationUpdate', result.data.data.recommendMoviesEmbeddingML, user ? user : '');
-        commit('updateTopGenres', result.data.data.recommendMoviesEmbeddingML);
-      }).then(() => {
+
+      })
+      .then(() => {
+        commit('updateTopGenres');
+      })
+      .then(() => {
+        commit('updateAvailableLanguages');
+      })
+      .then(() => {
         commit('loading', false);
       })
     },
-    actorQuery(context) {
-      axios({
-        url: 'http://localhost:8529/_db/movie-demo/ml-demo',
-        method: 'post',
-        data: {
-          query: `
-          query {
-            actorGraph(id: "Person/2911f9e2c86647e2fad007009b474dd8") {
-              query,
-              vertices{
-                ... on Movie {
-                movieID: id
-                title
-              }
-              ... on Person {
-                personID: id
-                name
-              }
-                
-              }
-              edges {
-                id
-                from
-                to
-                rev
-              }
-              path {
-              vertices{
-                ... on Movie {
-                movieID: id
-                title
-              }
-              ... on Person {
-                personID: id
-                name
-              }      
-              }
-            }
-          }
-            allMovies (limit: 2) {
-              id 
-              title
-            }
-          }
-          `
-        }
-      }).then((result) => {
-        context.commit('actorGraphUpdate', result)
-      })
-    },
     updateUser(context, user) {
-      context.commit('loading', true);
-      setTimeout(() => {
-
         context.commit('changeUser', user)
         context.state.queryInfo ? context.dispatch((context.state.queryInfo[context.state.currentQuery].queryName).toString(), user) : ''
-      }, 1000)
-      // context.commit('loading', false);
     },
+    updateSelectedLanguagesAction(context, langs) {
+      context.commit('updateSelectedLanguages', langs)
+    }
   },
   mutations: {
     increment (state) {
@@ -237,26 +273,34 @@ An interesting fact that makes you want to cli...`,
     updateGenres (state, genres) {
       state.selectedGenres = genres;
     },
+    updateSelectedLanguages (state, langs) {
+      console.log(langs)
+      state.selectedLanguages = langs.length > 0 ? langs : [];
+    },
+    updateAvailableLanguages (state) {
+      let langs = new Set();
+      state.recommendations.forEach(l => {
+        langs.add(l.movie.originalLanguage)
+      })     
+      state.languages = [...langs]
+    },
     updateRating (state, rating) {
       state.selectedRating = rating;
-      console.log(state.selectedRating)
     },
     toggleLeftPanel (state){
       state.showLeftPanel = !state.showLeftPanel
     },
-    actorGraphUpdate (state, queryResult) {
-      state.actorGraph =  queryResult.data.data.actorGraph
-    },
     userRecommendationUpdate (state, queryResult) {
       state.selectedGenres = []
       state.sortedGenres = []
+      state.selectedLanguages =[]
       // state.recommendations = [{}]
       state.recommendations =  queryResult
     },
-    updateTopGenres(state, queryResult) {
+    updateTopGenres(state) {
       const genreCount = {}
       let sorted = []
-      queryResult.forEach(element => {
+      state.recommendations.forEach(element => {
         element.movie.genres.forEach(g => {
           genreCount[g] = (genreCount[g] || 0) + 1;
         })
@@ -279,6 +323,7 @@ An interesting fact that makes you want to cli...`,
     },
     changeUser(state, user) {
       state.user = user;
+      state.selectedRating = 0;
     }
   }
 });

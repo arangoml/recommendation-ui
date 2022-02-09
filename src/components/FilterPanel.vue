@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <Accordion v-if="genres.length > 0">
+  <div class="filterPanel" >
+    <Accordion v-if="genres.length > 0" class="filterAccordion" >
         <AccordionTab header="Genres">
             <div class="checkboxes-wrapper">
             <div class="checkboxes p-d-flex p-flex-wrap p-jc-start">
@@ -9,7 +9,7 @@
                         <div>
                         <Checkbox :id="index" :value="genre[0]" v-model="selectedGenres" />
 
-                        <label :for="index" > {{genre[0]}}({{genre[1]}}) </label>                   
+                        <label :for="index" > {{genre[0]}} </label>                   
                         </div>
                     </div>
                 </div>
@@ -17,106 +17,60 @@
             </div>
         </AccordionTab>
         <AccordionTab header="Rating">
-            <Rating v-model="selectedRating" :cancel=false :stars="10"/>
-            Movies with at least {{stars}} stars
+            <div class="ratingClass">
+
+            <!-- <Rating  v-model="selectedRating" :cancel=false :stars="10"/> -->
+            <custom-ratings :numberOfAvocados="10"/>
+            Movies with at least {{selectedRating + 1}} avocados
+            </div>
         </AccordionTab>
         <AccordionTab header="Languages">
-            <div class="checkboxes-wrapper">
+            <div>
+
+            <!-- <div v-for="language, index in languages" v-bind:key="index"> -->
+                <span v-for="language, index in languages" v-bind:key="index">
+
+            <input type="checkbox" v-model="selectedLanguages" :value="language">
+            <label for="checkbox">{{ language }}</label>
+                <!-- </div> -->
+            </span>
+
+            </div>
+            <!-- <div class="checkboxes-wrapper">
             <div class="checkboxes p-d-flex p-flex-wrap p-jc-start">
-                <div class="inner-checkboxes" v-for="language of languages" v-bind:key="language">
+                <div class="inner-checkboxes" v-for="language, index of languages" v-bind:key="index">
                     <div class="p-field-checkbox p-mr-2 p-mb-2">
-                        <Checkbox :id=language name="Languages" :value=language v-model="selectedLanguages" />
-                        <label :for=language > {{language}} </label>                   
+                        <Checkbox :id="index" :value="language" v-model="selectedLanguages" />
+                        <label :for="index" > {{language}} </label>                   
                     </div>
                 </div>
             </div>
-            </div>
+            </div> -->
         </AccordionTab>
     </Accordion>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
+import customRatings from './customRatings.vue'
 
 export default {
     data() {
         return {
             genreArray: [],
-            selectedLanguages: [],
             stars:1,
-            languages: [
-                "Nederlands",
-                "қазақ",
-                "Srpski",
-                "Somali",
-                "العربية",
-                "Norsk",
-                "Český",
-                "Wolof",
-                "Esperanto",
-                "Français",
-                "বাংলা",
-                "తెలుగు",
-                "普通话",
-                "Português",
-                "ελληνικά",
-                "தமிழ்",
-                "Italiano",
-                "Hrvatski",
-                "Latviešu",
-                "Bahasa melayu",
-                "Català",
-                "Polski",
-                "shqip",
-                "svenska",
-                "Український",
-                "Español",
-                "Pусский",
-                "广州话 / 廣州話",
-                "עִבְרִית",
-                "English",
-                "Magyar",
-                "Gaeilge",
-                "euskera",
-                "Türkçe",
-                "Deutsch",
-                "Slovenčina",
-                "Română",
-                "Dansk",
-                "Cymraeg",
-                "Bahasa indonesia",
-                "беларуская мова",
-                "Íslenska",
-                "ภาษาไทย",
-                "فارسی",
-                "български език",
-                "한국어/조선말",
-                "No Language",
-                "日本語",
-                "Afrikaans",
-                "اردو",
-                "Tiếng Việt",
-                "Azərbaycan",
-                "Latin",
-                "Malti",
-                "isiZulu",
-                "suomi",
-                "हिन्दी",
-                "Eesti",
-                "Kiswahili",
-                "پښتو",
-                "Bosanski",
-                "ქართული",
-                "ਪੰਜਾਬੀ",
-                "Bamanankan",
-                "Galego"
-                ],
+            langs: [],
+            selectedLangs: []
         }
+    },
+    components: {
+        customRatings
     },
     computed: {
         ...mapState({
             genres: state => state.sortedGenres ? state.sortedGenres : [],
+            languages: state => state.languages ? state.languages : []
         }),
         selectedGenres: {
             get: function() {
@@ -131,15 +85,26 @@ export default {
                 return this.$store.state.selectedRating;
             },
             set: function(rating) {
-                console.log(rating)
                 this.$store.commit("updateRating", rating);
             }
-        }
+        },
+        selectedLanguages: {
+            get: function() {
+                return this.$store.state.selectedLanguages;
+            },
+            set: function(lang) {
+                this.$store.commit("updateSelectedLanguages", lang);
+            }
+        },
     },
     methods: {
-    }
+        ...mapActions({
+            updateSelectedLanguagesAction: 'updateSelectedLanguagesAction'
+        })
+    },
 }
 </script>
 
-<style scoped>
+<style lang="scss">
+
 </style>
