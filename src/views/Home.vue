@@ -159,7 +159,7 @@ div.top-panel {
 
 }
 .bottom-panel-expanded {
-  background-color: var(--panel-background);
+  background-color: var(--panel-background-with-opacity);
   height: 70vh;
   margin-top: 29vh;
   z-index: 1 !important;
