@@ -36,7 +36,7 @@
     --surface-border: var(--arangodb-icons-a);
     --panel-background: #373838fa;
     --panel-background-some-opacity: #373838de;
-    --panel-background-with-opacity: #373838f8;
+    --panel-background-with-opacity: #373838;
     --primary-text-color: var(--arangodb-background-c);
     --selected-button: var(--arangodb-button-color-downloads-a);
     --secondary-button-accent: var(--arangodb-additional-b);
@@ -51,12 +51,16 @@ body p {
     background: var(--panel-background);
     border: 1px solid var(--surface-border);
   }
-.p-accordion-tab-active {
-    background-color: var(--selected-button);
+.p-accordion .p-accordion-header:hover {
+color: var(--primary-text-color);
+background-color: var(--selected-button);
+border: 1px solid var(--surface-border);
 }
-.p-accordion-tab-active a .p-accordion-header-link{
+.p-accordion-tab-active a .p-accordion-header {
+    color: var(--primary-text-color);
     background-color: var(--selected-button);
-}
+    border: 1px solid var(--surface-border);
+  }
 .p-accordion .p-accordion-content {
     background-color: var(--surface-a);
 }

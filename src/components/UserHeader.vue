@@ -1,6 +1,10 @@
 <template>
   <div class="flexgrid">
-    <h1>ArangoFlix</h1>
+    <div>
+    <h1><img class="headerImage" src="../assets/ArangoFlix.png" alt=""></h1>
+    </div>
+    <div>
+
         <h2>Recommendation Method</h2>
         <div style="margin-top: .5em;" class="p-d-flex p-flex-row p-jc-center recommendation-preference-row">
           <div class="p-mr-2">
@@ -16,6 +20,7 @@
                   <Button  v-on:click="updateUser(index+1)" class="user-button" :class="index+1 == user ? 'selectedButton' : ''" ><i class="pi pi-user"></i><p> {{u}}</p></Button>
                 </div>
         </div>
+    </div>
   </div>
 </template>
 
@@ -78,12 +83,7 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.flexgrid{
-  /* background-color: var(--surface-b); */
-
-  }
 .user-row {
   overflow-x: scroll;
 }
@@ -122,5 +122,8 @@ li {
 }
 a {
   color: #42b983;
+}
+.headerImage {
+  opacity: 100% !important;
 }
 </style>
