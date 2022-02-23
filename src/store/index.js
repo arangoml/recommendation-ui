@@ -274,7 +274,6 @@ LET userRatedMovies = (FOR ratingEdge IN rates FILTER ratingEdge._from == @userI
       state.selectedGenres = genres;
     },
     updateSelectedLanguages (state, langs) {
-      console.log(langs)
       state.selectedLanguages = langs.length > 0 ? langs : [];
     },
     updateAvailableLanguages (state) {

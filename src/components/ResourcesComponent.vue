@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="resourcesContainer">
       <h2>Resources</h2>
       <p>
           You can see how we generated the analytical data for this in the following notebook:
@@ -35,6 +35,6 @@ export default {
 }
 </script>
 
-<style>
+<style >
 
 </style>

@@ -1,7 +1,8 @@
 <template>
   <div class="flexgrid">
-    <div>
+    <div class="headerContainer" >
     <h1><img class="headerImage" src="../assets/ArangoFlix.png" alt=""></h1>
+      <Divider layout="horizontal" style="margin: 0;" />
     </div>
     <div>
 
@@ -17,7 +18,7 @@
 
         <div style="margin-top: .5em" class="p-grid user-row">
                 <div v-for="u, index of users" :key="index" class="p-col userButtonDiv">
-                  <Button  v-on:click="updateUser(index+1)" class="user-button" :class="index+1 == user ? 'selectedButton' : ''" ><i class="pi pi-user"></i><p> {{u}}</p></Button>
+                  <Button  v-on:click="updateUser(index+1)" class="user-button" :class="index+1 == user ? 'selectedButton' : ''" ><i class="pi pi-user">&nbsp;</i><p> {{u}}</p></Button>
                 </div>
         </div>
     </div>
@@ -88,11 +89,12 @@ export default {
   overflow-x: scroll;
 }
 .user-button {
-  width: 7em;
-  height: 7em;
-}
+  width: 6vw;
+  height: 7vh;
+  text-align: left;  
+} 
 .user-button>p::first-letter{
-  font-size: 140%;
+  font-size: 120%;
   font-weight: bold;
   
 }
@@ -124,6 +126,6 @@ a {
   color: #42b983;
 }
 .headerImage {
-  opacity: 100% !important;
+  opacity: 1 !important;
 }
 </style>

@@ -14,7 +14,7 @@
       <transition name="fade-from-top" >
       <Divider v-if="expanded" layout="vertical" style="margin: 0;" />
       </transition>
-      <div class="p-col-4">
+      <div class="p-col-4 resources">
       <ResourcesComponent :expanded=expanded />
       </div>
   </div>
@@ -61,4 +61,5 @@ export default {
   transform: translateY(-75px);
   opacity: 0;
 }
+
 </style>
