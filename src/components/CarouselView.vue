@@ -1,7 +1,7 @@
 <template>
 <div>
     <div class="card">
-        <Carousel v-for="genre, index in computedGenres" :name="genre[0]" v-bind:key="index + selectedLanguages.length" :value="filteredRecommendations(genre[0])" :numVisible="4" :numScroll="2" :page=0 :responsiveOptions="responsiveOptions" >
+        <Carousel v-for="genre, index in computedGenres" :name="genre[0]" v-bind:key="index + selectedLanguages.length" :value="filteredRecommendations(genre[0])" :numVisible="4" :numScroll="filteredRecommendations < 4 ? filteredRecommendations().length : 4" :page=0 :responsiveOptions="responsiveOptions" >
             <template #header>
                 <h5>{{genre[0]}}({{filteredRecommendations(genre[0]).length}})</h5>
             </template>
@@ -111,7 +111,7 @@ export default {
         });
 
         movies.forEach((e) => {
-          e.movie.voteAverage >= this.selectedRating + 1 && e.movie.posterPath != null && (this.selectedLanguages.length > 0 ? this.selectedLanguages.find(l => l == e.movie.originalLanguage): true) ? filteredRatedMovies.push(e) : ''
+          e.movie.voteAverage >= this.selectedRating + 1 && (this.selectedLanguages.length > 0 ? this.selectedLanguages.find(l => l == e.movie.originalLanguage): true) ? filteredRatedMovies.push(e) : ''
         })
         this.filteredmovies = filteredRatedMovies
       return filteredRatedMovies

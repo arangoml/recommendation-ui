@@ -55,14 +55,14 @@ export default {
     width: 35px;
     padding: 3px;
 }
-.avocado:hover{
-    opacity: 100%;
+.avocadoRating:hover{
+    opacity: 1 !important;
 }
 .avocadoRating {
-    opacity: 30%;
+    opacity: .5 !important;
 }
-.avocadoRatingClicked {
-    opacity: 85%;
+.avocadoRatingClicked::before {
+    opacity: .85;
 }
 
 </style>

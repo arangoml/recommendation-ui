@@ -93,7 +93,7 @@ export default {
                 return this.$store.state.selectedLanguages;
             },
             set: function(lang) {
-                this.$store.commit("updateSelectedLanguages", lang);
+                this.$store.dispatch("updateSelectedLanguagesAction", lang);
             }
         },
     },

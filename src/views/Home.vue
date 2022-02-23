@@ -12,7 +12,7 @@
           <div v-show="showLeftPanel" class="p-col-2">
             <transition name="slide-fade-reverse">
               <Button
-                icon="pi pi-angle-left"
+                icon="pi pi-angle-left a"
                 class="p-button-text left-panel-icon p-offset-0 closeButton"
               ></Button>
             </transition>
@@ -22,7 +22,7 @@
             <transition name="slide-fade">
               <Button
                 v-show="!showLeftPanel"
-                icon="pi pi-angle-right"
+                icon="pi pi-angle-right a"
                 class="p-button-text left-panel-icon p-offset-6"
               ></Button>
             </transition>
@@ -155,6 +155,7 @@ div.top-panel {
   margin-top: 2vh;
   transition: width .5s, transform 1s;
   top: 0px;
+  overflow: hidden;
 
 
 }
