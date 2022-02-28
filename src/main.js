@@ -37,15 +37,13 @@ import AccordionTab from 'primevue/accordiontab';
 import Rating from 'primevue/rating';
 import ProgressSpinner from 'primevue/progressspinner';
 
-
-
-
 const app = createApp(App);
 
 app.use(PrimeVue);
 app.use(ToastService);
 app.use(Carousel);
 app.use(store);
+
 
 // globally (in your main .js file)
 app.component('InputText', InputText);

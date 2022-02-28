@@ -130,7 +130,9 @@ LET userRatedMovies = (FOR ratingEdge IN rates FILTER ratingEdge._from == @userI
       loadingData: false,
       user: 1,
       selectedRating: 0,
-      languages: []
+      languages: [],
+      openExplainer: false,
+      explainerResult: []
     }
   },
   getters: {
@@ -261,6 +263,42 @@ LET userRatedMovies = (FOR ratingEdge IN rates FILTER ratingEdge._from == @userI
     },
     updateSelectedLanguagesAction(context, langs) {
       context.commit('updateSelectedLanguages', langs)
+    },
+    explainerAction({commit, state}) {
+      state.openExplainer == true ? commit("toggleExplainer") : (
+        axios({
+          url: 'http://localhost:8529/_db/movie-demo/ml-demo',
+          method: 'post',
+          data: {
+            query: `
+            query {
+              explainRecommendMoviesEmbeddingML (pathLimit: 12) {
+                vertices {
+                  ...on Movie {
+                    movieId: id
+                    title
+                    overview
+                  }
+                  ...on User {
+                    name
+                    userId: id                    
+                  }
+                }
+                edges {
+                  id
+                  source: from
+                  target: to
+                }
+              }
+            }
+            `
+          }
+        })
+      ).then((result) => {
+        commit("updateExplainerResult", result.data.data['explainRecommendMoviesEmbeddingML'])
+        // commit("updateExplainerResult", result.data.data[(state.queryInfo[state.currentQuery].queryName).toString()])
+        commit("toggleExplainer")
+      })
     }
   },
   mutations: {
@@ -323,6 +361,12 @@ LET userRatedMovies = (FOR ratingEdge IN rates FILTER ratingEdge._from == @userI
     changeUser(state, user) {
       state.user = user;
       state.selectedRating = 0;
+    },
+    updateExplainerResult(state, result) {
+      state.explainerResult = result
+    },
+    toggleExplainer(state) {
+      state.openExplainer = !state.openExplainer;
     }
   }
 });
