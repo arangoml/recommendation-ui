@@ -1,12 +1,21 @@
 <template>
+<div>
+
   <div v-show="openExplainer" id="parent-grid" class="explainer p-grid">
       <div class="p-col-12">
         <Button class="closeButton" @click="toggleExplainer()">CLOSE</Button>
         <Button class="getDataButton" @click="setupVisualization()">Load The Graph</Button>
         </div>
-      <div id="explainerQuery">{{ clickedNode }}</div>
-      <div id="cy"></div>
+      <div class="p-col-2" id="explainerQuery">
+        <h2>Selected Node</h2>
+        <p v-for="item, i in clickedNode.data" v-bind:key="i">
+          {{ item }}
+        </p>
+        </div>
+      <div class="p-col-8" id="cy"></div>
+        
   </div>
+</div>
 </template>
 
 <script>
@@ -35,7 +44,7 @@ export default {
             style: {
               'background-color': '#88a049',
               'label': 'data(label)',
-              'font-size': '5',
+              'font-size': '3',
               'width': '7',
               'height': '7',
               'color': '#faf8f0'
@@ -46,7 +55,7 @@ export default {
             selector: '.userVertex', // but this does,
             style: {
               // 'label': 'data(label)',
-              'background-color': 'blue'
+              'background-color': '#cc8e39'
               }
             },
             {
@@ -90,14 +99,17 @@ export default {
               let vObj = {data:{}}
               let eObj = {data:{}}
         path.vertices.forEach((vert) => {
-          vert.id = vert.movieId ? vert.movieId : vert.userId
+          if(vert != null) {
+
+            vert.id = vert.movieId ? vert.movieId : vert.userId
           vert.movieId ? '' : vObj.classes = 'userVertex'
           // vert.classes = (vert.movieId ? '' : 'userVertex')
           // vert.movieId ? '' : vert.classes
-          vert.label = vert.id
+          vert.label = vert.title ? vert.title : vert.id
           Object.assign(vObj['data'],vert)
           this.graphNodes.push(vObj)
           vObj = {data:{}}
+        }
         })
         path.edges.forEach((edge) => {
           edge.label = ("_from:" + edge.source + " _to:" + edge.target).toString()
@@ -114,9 +126,8 @@ export default {
             }
           })) : ''
           this.cy.layout(this.layout).run();
-      this.cy.bind('click', 'node', function(evt) {
-        console.log(evt)
-        console.log(this.cy.json)
+      this.cy.bind('click', 'node', (evt) => {
+        this.clickedNode = this.graphNodes.find(x => x.data.id == evt.target.id())
         
       })
       }
@@ -134,7 +145,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .explainer {
     width: 80vw;
     height: 80vh;
@@ -162,7 +173,7 @@ export default {
 }
 #cy {
   display: grid;
-  border: 2px blue solid;
+  border: 2px var(--arangodb-button-color-primary-a) solid;
   height: 90%;
   width: 80%;
   text-align: left;
@@ -170,6 +181,13 @@ export default {
   display: block;
   margin-right: 1vw;
 
+}
+#explainerQuery {
+  border: 2px var(--arangodb-button-color-primary-a) solid;
+  height: 90%;
+  margin: auto;
+  display: block;
+  // width: 80%;  
 }
 
 </style>
