@@ -1,16 +1,16 @@
 <template>
 <div>
-
-  <div v-show="openExplainer" id="parent-grid" class="explainer p-grid">
+  <div v-show="openExplainer" id="parent-grid" :class="openExplainer ? '' : 'closedExplainer'" class="explainer p-grid">
       <div class="p-col-12">
         <Button class="closeButton" @click="toggleExplainer()">CLOSE</Button>
         <Button class="getDataButton" @click="setupVisualization()">Load The Graph</Button>
         </div>
       <div class="p-col-2" id="explainerQuery">
-        <h2>Selected Node</h2>
-        <p v-for="item, i in clickedNode.data" v-bind:key="i">
+        <h2>Selected {{ clickedNode.data ? "Node" : "Edge" }}</h2>
+        <p class="selectedInfo" v-for="item, i in (clickedNode.data ? clickedNode.data : clickedEdge.data)" v-bind:key="i">
           {{ item }}
         </p>
+        
         </div>
       <div class="p-col-8" id="cy"></div>
         
@@ -21,6 +21,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import cytoscape from 'cytoscape';
+import { nextTick } from '@vue/runtime-core';
 // import { nextTick } from 'vue';
 
 
@@ -31,6 +32,11 @@ export default {
         initial: 0,
         cy: {},
         clickedNode: {},
+        clickedEdge: {},
+        connectedEdges: {},
+        connectedNodes: {},
+        displayConnectedNodes: [],
+        highlightedEdge: {},
         graphNodes:[],
         graphEdges:[],
         layout: {
@@ -84,6 +90,11 @@ export default {
         explainerResult: state => state.explainerResult
     }),
     },
+    watch: {
+      'explainerResult'() {
+        this.setupVisualization();
+      }
+    },
     methods: {
         ...mapActions({
         toggleExplainer: 'explainerAction'
@@ -91,57 +102,103 @@ export default {
         async setupVisualization() {
           this.cy = cytoscape({
             container: document.getElementById('cy'), // container to render in
+            wheelSensitivity: 0.25,
             layout: this.layout,
             style: this.style
           })
 
-            await this.explainerResult.forEach((path) => {
+            await this.explainerResult.forEach((path, pi) => {
               let vObj = {data:{}}
               let eObj = {data:{}}
-        path.vertices.forEach((vert) => {
-          if(vert != null) {
+          path.vertices.forEach((vert) => {
+            if(vert != null) {
 
-            vert.id = vert.movieId ? vert.movieId : vert.userId
-          vert.movieId ? '' : vObj.classes = 'userVertex'
-          // vert.classes = (vert.movieId ? '' : 'userVertex')
-          // vert.movieId ? '' : vert.classes
-          vert.label = vert.title ? vert.title : vert.id
-          Object.assign(vObj['data'],vert)
-          this.graphNodes.push(vObj)
-          vObj = {data:{}}
-        }
-        })
-        path.edges.forEach((edge) => {
-          edge.label = ("_from:" + edge.source + " _to:" + edge.target).toString()
-          Object.assign(eObj['data'],edge)
-          this.graphEdges.push(eObj)
-          eObj = {data:{}}
-        })
-      })
-          this.graphNodes != undefined ? (
-            this.cy.json({
-              elements: {
-                nodes: this.graphNodes,
-              edges: this.graphEdges
+              vert.id = vert.movieId ? vert.movieId : vert.userId
+            vert.movieId ? '' : vObj.classes = 'userVertex'
+            vert.label = vert.title ? vert.title : vert.id
+            
+            Object.assign(vObj['data'],vert)
+            this.graphNodes.push(vObj)
+            vObj = {data:{}}
+            vObj.path = pi;
+          }
+          })
+          path.edges.forEach((edge) => {
+            edge.label = ("_from:" + edge.source + " _to:" + edge.target).toString()
+            Object.assign(eObj['data'],edge)
+            this.graphEdges.push(eObj)
+            eObj = {data:{}}
+            })
+          })
+            this.graphNodes != undefined ? (
+              this.cy.json({
+                elements: {
+                  nodes: this.graphNodes,
+                edges: this.graphEdges
+              }
+            })) : ''
+
+          this.cy.bind('click', 'node', (evt) => {
+            this.highlightedEdge[0] ? this.highlightedEdge.animate({
+              style: this.style.find(x => x.selector == 'edge').style
+            }) : ''
+
+            
+            this.connectedEdges[1] ? this.connectedEdges.animate({
+              style: this.style.find(x => x.selector == 'edge').style
+            }) : ''
+            this.clickedEdge = {};
+            this.clickedNode = this.graphNodes.find(x => x.data.id == evt.target.id());
+
+            this.connectedEdges = evt.target.connectedEdges();
+            this.connectedEdges.animate({
+              style: {lineColor: '#86943f'}
+            })            
+          })
+          this.cy.bind('click', 'edge', (evt) => {
+            this.highlightedEdge[0] ? this.highlightedEdge.animate({
+              style: this.style.find(x => x.selector == 'edge').style
+            }) : ''
+            this.connectedEdges[1] ? this.connectedEdges.animate({
+              style: this.style.find(x => x.selector == 'edge').style
+            }) : ''            
+            this.clickedNode = {};
+            this.clickedEdge = this.graphEdges.find(x => x.data.id == evt.target.id())
+            evt.target.animate({
+              style: {"line-color": "#86943f"}
+            })
+            this.highlightedEdge = evt.target;
+            this.connectedNodes = evt.target.connectedNodes();
+            
+          })
+          this.cy.on('click', function(event){
+            // target holds a reference to the originator
+            // of the event (core or element)
+            var evtTarget = event.target;
+
+            if( evtTarget === this.cy ){
+              console.log('tap on background');
+              this.resetSelectionStyling();
             }
-          })) : ''
-          this.cy.layout(this.layout).run();
-      this.cy.bind('click', 'node', (evt) => {
-        this.clickedNode = this.graphNodes.find(x => x.data.id == evt.target.id())
-        
-      })
+          });
+            await nextTick(() => {
+              this.cy.layout(this.layout).run();
+            })
+      },
+      resetSelectionStyling() {
+        this.highlightedEdge[0] ? this.highlightedEdge.animate({
+            style: this.style.find(x => x.selector == 'edge').style
+          }) : ''
+
+          
+        this.connectedEdges[1] ? this.connectedEdges.animate({
+            style: this.style.find(x => x.selector == 'edge').style
+          }) : ''
+
+        this.clickedEdge = {};
+        this.clickedNode = {};
       }
     },
-    async updated() {
-      this.initial == 0 ? await this.setupVisualization() : ''
-      this.initial = 1;
-      },
-    async mounted() {
-      await this.setupVisualization();
-    },
-    
-
-
 }
 </script>
 
@@ -156,6 +213,11 @@ export default {
     background-color: gray;
     animation: showExplainer .25s;
 }
+.closedExplainer {
+  animation: showExplainer .2s;
+  animation-direction: reverse;
+}
+
 @keyframes showExplainer {
   from {
     transform: scale(0);
@@ -164,6 +226,7 @@ export default {
     transform: scale(1);
   }
 }
+
 .closeButton {
     top: 0;
     left: 40vw;
@@ -188,6 +251,10 @@ export default {
   margin: auto;
   display: block;
   // width: 80%;  
+}
+
+.selectedInfo {
+  overflow-wrap: break-word;
 }
 
 </style>

@@ -18,7 +18,7 @@
                             <div class="car-buttons p-mt-5">
                                 <Button icon="pi pi-sync" class="p-button p-button-rounded p-mr-2" @click="toggleCard(slotProps.data)"/>
 
-                                <Button icon="pi pi-star-fill" class="p-button-rounded p-mr-2 avocadoButton" @click="explainerAction(slotProps.data.movie.movieId)"> <img class="avocadoButtonImage" src="../assets/adblogo.png" alt="" /> </Button>
+                                <Button icon="pi pi-star-fill" class="p-button-rounded p-mr-2 avocadoButton" @click="explainerAction(slotProps.data.movie.movieId)"> <img class="avocadoButtonImage" src="../assets/graphIcon.svg" alt="" /> </Button>
                             </div>
                         </div>
                             <h4 class="p-mb-1">{{slotProps.data.movie.title}}</h4>
@@ -32,6 +32,7 @@
                     <div v-show="slotProps.data.flipped" class="movie-item-content" :class="!slotProps.data.flipped ? 'delete-card' : '' ">
                         <div class="car-buttons p-mt-5">
                         <Button icon="pi pi-sync" class="p-button p-button-rounded p-mr-2" @click="toggleCard(slotProps.data)"/>
+                        <Button icon="pi pi-star-fill" class="p-button-rounded p-mr-2 avocadoButton" @click="explainerAction(slotProps.data.movie.movieId)"> <img class="avocadoButtonImage" src="../assets/graphIcon.svg" alt="" /> </Button>
                         <p>{{slotProps.data.movie.overview}}</p>
                         <p>Genres: {{slotProps.data.movie.genres}}</p>
                         <p>Language: {{slotProps.data.movie.originalLanguage}}</p>

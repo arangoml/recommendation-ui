@@ -224,40 +224,11 @@ const store = createStore({
     explainerAction({commit, state}) {
 
       state.openExplainer == true ? commit("toggleExplainer") : (
-        axios({
-          url: 'http://localhost:8529/_db/movie-demo/ml-demo',
-          method: 'post',
-          data: {
-            query: `
-            query {
-              explainRecommendMoviesEmbeddingML (pathLimit: 12) {
-                vertices {
-                  ...on Movie {
-                    movieId: id
-                    title
-                    overview
-                    genres
-                  }
-                  ...on User {
-                    name
-                    userId: id                    
-                  }
-                }
-                edges {
-                  id
-                  source: from
-                  target: to
-                }
-              }
-            }
-            `
-          }
-        })
-      ).then((result) => {
-        commit("updateExplainerResult", result.data.data['explainRecommendMoviesEmbeddingML'])
-        // commit("updateExplainerResult", result.data.data[(state.queryInfo[state.currentQuery].queryName).toString()])
+        commit("explainerQueryMutation"),
+          // commit("updateExplainerResult",state.result.data.data['explainRecommendMoviesEmbeddingML']);
         commit("toggleExplainer")
-      })
+        // commit("updateExplainerResult", result.data.data[(state.queryInfo[state.currentQuery].queryName).toString()])
+      )
     }
   },
   mutations: {
@@ -323,6 +294,40 @@ const store = createStore({
     },
     updateExplainerResult(state, result) {
       state.explainerResult = result
+    },
+    explainerQueryMutation(state) {
+        axios({
+          url: 'http://localhost:8529/_db/movie-demo/ml-demo',
+          method: 'post',
+          data: {
+            query: `
+            query {
+              explainRecommendMoviesEmbeddingML (pathLimit: 12) {
+                vertices {
+                  ...on Movie {
+                    movieId: id
+                    title
+                    overview
+                    genres
+                    posterPath
+                  }
+                  ...on User {
+                    name
+                    userId: id                    
+                  }
+                }
+                edges {
+                  id
+                  source: from
+                  target: to
+                }
+              }
+            }
+            `
+          }
+        }).then((result) => {
+          state.explainerResult = result.data.data['explainRecommendMoviesEmbeddingML']
+        })
     },
     toggleExplainer(state) {
       state.openExplainer = !state.openExplainer;
