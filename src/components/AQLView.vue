@@ -7,13 +7,7 @@
     <p v-show="expanded">See the panel to the right to learn more.</p>
     <transition name="fade-from-top">
     <div class="p-grid p-jc-center aql-code" v-show="expanded">
-      <pre>
-        <code>
-        {{
-          queryInfo[currentQuery].aqlQuery
-        }}
-        </code>
-      </pre>
+      <pre><span v-html="queryInfo[currentQuery].aqlQuery"></span></pre>
       
       <div class="aql-details p-row-1">
       

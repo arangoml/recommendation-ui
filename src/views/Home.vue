@@ -58,6 +58,7 @@
             <UserHeader />
           </div>
           <div class="p-col-12 carousel" >
+            <explainer />
             <CarouselView />
           </div>
           
@@ -81,6 +82,7 @@
 
 import UserHeader from "../components/UserHeader.vue";
 import CarouselView from "../components/CarouselView.vue";
+import explainer from "../components/explainer.vue";
 import FilterPanel from "../components/FilterPanel.vue";
 import DetailsPanel from "../components/DetailsPanel.vue";
 
@@ -93,6 +95,7 @@ export default {
     CarouselView,
     FilterPanel,
     DetailsPanel,
+    explainer,
   },
   data() {
     return {
