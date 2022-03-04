@@ -42,6 +42,7 @@ const app = createApp(App);
 app.use(PrimeVue);
 app.use(ToastService);
 app.use(Carousel);
+app.use(ProgressSpinner);
 app.use(store);
 
 

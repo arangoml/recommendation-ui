@@ -1,9 +1,11 @@
 <template>
+      <div v-show="loadingData" class="spinner">
+        <ProgressSpinner />
+      </div>
+
+<API_URL />
   <transition name="slide-fade">
     <div id="parent-grid" class="p-grid nested-grid movie-grid p-jc-center">
-      <div v-show="loadingData" class="spinner">
-      <ProgressSpinner />
-      </div>
       <div
         class="p-shadow-5 top-elements leftPanel"
         :class="showLeftPanel ? 'p-col-3' : 'p-col-1'"
@@ -85,8 +87,9 @@ import CarouselView from "../components/CarouselView.vue";
 import explainer from "../components/explainer.vue";
 import FilterPanel from "../components/FilterPanel.vue";
 import DetailsPanel from "../components/DetailsPanel.vue";
+import API_URL from "./API_URL.vue";
 
-import {mapMutations, mapState} from 'vuex';
+import {mapMutations, mapState, mapActions} from 'vuex';
 
 export default {
   name: "Home",
@@ -96,6 +99,7 @@ export default {
     FilterPanel,
     DetailsPanel,
     explainer,
+    API_URL
   },
   data() {
     return {
@@ -107,17 +111,26 @@ export default {
   computed: {
     ...mapState({
       showLeftPanel: state => state.showLeftPanel,
-      loadingData: state => state.loadingData
+      loadingData: state => state.loadingData,
+      APIURL: state => state.APIURL
     })
   },
   methods: {
+    ...mapActions([
+         'setAPIURL' 
+      ]),
     toggleBottomPanel: function () {
       this.expandBottomPanel = !this.expandBottomPanel;
     },
     ...mapMutations({
-      toggleLeftPanel: 'toggleLeftPanel'
+      toggleLeftPanel: 'toggleLeftPanel',
+      loading: 'loading'
     })
   },
+  async mounted() {
+    this.loading(false)
+    await this.setAPIURL(new URL(location.href).searchParams.get('OasisURL'))
+  }
 };
 </script>
 
@@ -132,7 +145,7 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 4;
+  z-index: 10;
 }
 
 div.top-panel {

@@ -2,8 +2,7 @@
 <div>
   <div v-show="openExplainer" id="parent-grid" :class="openExplainer ? '' : 'closedExplainer'" class="explainer p-grid">
       <div class="p-col-12">
-        <Button class="closeButton" @click="toggleExplainer()">CLOSE</Button>
-        <Button class="getDataButton" @click="setupVisualization()">Load The Graph</Button>
+        <Button class="closeButton" @click="toggleGraph()">CLOSE</Button>
         </div>
       <div class="p-col-2" id="explainerQuery">
         <h2>Selected {{ clickedNode.data ? "Node" : "Edge" }}</h2>
@@ -74,7 +73,7 @@ export default {
               'target-arrow-shape': 'triangle',
               'arrow-scale': '.5',
               'width': '1',
-              'label': 'Distance: 2.0',
+              'label': 'data(distance)',
               'font-size': '2',
               'text-rotation': 'autorotate',
               'color': '#faf8f0',
@@ -99,7 +98,27 @@ export default {
         ...mapActions({
         toggleExplainer: 'explainerAction'
         }),
+        async toggleGraph() {
+          // this.$store.commit('loading', true)
+
+          this.resetGraph();
+          
+          this.cy.json({
+            elements: {
+              nodes: this.graphNodes,
+            edges: this.graphEdges
+            }
+          })
+
+          await nextTick(() => {
+            this.cy.layout(this.layout).run();
+          })
+
+          this.toggleExplainer();
+          // this.$store.commit('loading', false)
+        },
         async setupVisualization() {
+          this.resetGraph();
           this.cy = cytoscape({
             container: document.getElementById('cy'), // container to render in
             wheelSensitivity: 0.25,
@@ -125,6 +144,7 @@ export default {
           })
           path.edges.forEach((edge) => {
             edge.label = ("_from:" + edge.source + " _to:" + edge.target).toString()
+            edge.distance = "Distance: " + edge.distance.toFixed(3);
             Object.assign(eObj['data'],edge)
             this.graphEdges.push(eObj)
             eObj = {data:{}}
@@ -139,15 +159,7 @@ export default {
             })) : ''
 
           this.cy.bind('click', 'node', (evt) => {
-            this.highlightedEdge[0] ? this.highlightedEdge.animate({
-              style: this.style.find(x => x.selector == 'edge').style
-            }) : ''
-
-            
-            this.connectedEdges[1] ? this.connectedEdges.animate({
-              style: this.style.find(x => x.selector == 'edge').style
-            }) : ''
-            this.clickedEdge = {};
+            this.resetSelectionStyling();
             this.clickedNode = this.graphNodes.find(x => x.data.id == evt.target.id());
 
             this.connectedEdges = evt.target.connectedEdges();
@@ -156,13 +168,7 @@ export default {
             })            
           })
           this.cy.bind('click', 'edge', (evt) => {
-            this.highlightedEdge[0] ? this.highlightedEdge.animate({
-              style: this.style.find(x => x.selector == 'edge').style
-            }) : ''
-            this.connectedEdges[1] ? this.connectedEdges.animate({
-              style: this.style.find(x => x.selector == 'edge').style
-            }) : ''            
-            this.clickedNode = {};
+            this.resetSelectionStyling();
             this.clickedEdge = this.graphEdges.find(x => x.data.id == evt.target.id())
             evt.target.animate({
               style: {"line-color": "#86943f"}
@@ -171,13 +177,10 @@ export default {
             this.connectedNodes = evt.target.connectedNodes();
             
           })
-          this.cy.on('click', function(event){
-            // target holds a reference to the originator
-            // of the event (core or element)
+          this.cy.on('click', (event) => {
             var evtTarget = event.target;
 
-            if( evtTarget === this.cy ){
-              console.log('tap on background');
+              if (typeof evtTarget.ready === "function") { 
               this.resetSelectionStyling();
             }
           });
@@ -197,6 +200,16 @@ export default {
 
         this.clickedEdge = {};
         this.clickedNode = {};
+      },
+      resetGraph() {
+        this.clickedNode= {}
+        this.clickedEdge= {}
+        this.connectedEdges= {}
+        this.connectedNodes= {}
+        this.displayConnectedNodes= []
+        this.highlightedEdge= {}
+        this.graphNodes=[]
+        this.graphEdges=[]
       }
     },
 }
@@ -229,7 +242,7 @@ export default {
 
 .closeButton {
     top: 0;
-    left: 40vw;
+    left: 35vw;
 }
 .getDataButton {
     top: 0;
