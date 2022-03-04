@@ -13,7 +13,8 @@
                         <div class="p-mb-3">
                             
                             <!-- <img v-show="slotProps.data.movie.posterPath != null" :src="'https://image.tmdb.org/t/p/w500'+ slotProps.data.movie.posterPath" :alt="slotProps.data.name" class="movie-image" /> -->
-                            <img :src="slotProps.data.movie.posterPath == null ? placeholderImage : 'https://image.tmdb.org/t/p/w500'+ slotProps.data.movie.posterPath" :alt="slotProps.data.name" class="movie-image" />
+                            <img :src="slotProps.data.movie.posterPath == null ? placeholderImage : slotProps.data.movie.posterPath" :alt="slotProps.data.name" class="movie-image" />
+                            
                         </div>
                             <div class="car-buttons p-mt-5">
                                 <Button icon="pi pi-sync" class="p-button p-button-rounded p-mr-2" @click="toggleCard(slotProps.data)"/>
@@ -24,7 +25,6 @@
                             <h4 class="p-mb-1">{{slotProps.data.movie.title}}</h4>
                             <h6 class="p-mt-0 p-mb-3">Average User Rating: {{slotProps.data.movie.voteAverage}}</h6>
                             <h6 class="p-mt-0 p-mb-3">Recommendation Score: {{slotProps.data.score}}</h6>
-
                       
                     </div>
                 </transition>
@@ -178,4 +178,5 @@ export default {
 .avocadoButton {
   background-color: rgba(0, 128, 0, 0);
 }
+
 </style>

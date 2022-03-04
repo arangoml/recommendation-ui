@@ -14,9 +14,12 @@
       <transition name="fade-from-top" >
       <Divider v-if="expanded" layout="vertical" style="margin: 0;" />
       </transition>
+      <transition name="fade-from-top" >
       <div class="p-col-4 resources">
       <ResourcesComponent :expanded=expanded />
+        <p v-if="!expanded" class="tmdb-attribution" >This product uses the TMDB API but is not endorsed or certified by TMDB. <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_1-5bdc75aaebeb75dc7ae79426ddd9be3b2be1e342510f8202baf6bffa71d7f5c4.svg" class="tmdb-logo" /></p>
       </div>
+      </transition>
   </div>
 </div>
 </template>
@@ -61,5 +64,10 @@ export default {
   transform: translateY(-75px);
   opacity: 0;
 }
-
+.tmdb-attribution {
+  font-size: .9em;
+}
+.tmdb-logo {
+  width: 2vw;
+}
 </style>

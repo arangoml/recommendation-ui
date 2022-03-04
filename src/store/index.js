@@ -7,6 +7,8 @@ import { createStore } from 'vuex'
 const store = createStore({
   state () {
     return {
+      APIURL: "http://localhost:8080",
+      APIRESPONSE: 0,
       count: 0,
       recommendations: [{movie: 79132, title: "Inception", ratingSum : 158.5}],
       currentQuery: 0,
@@ -26,19 +28,6 @@ const store = createStore({
           `,
           "aqlQuery":"<p>  WITH Movie, User, rates  LET similarUsers =  (FOR movie, edge IN 1 OUTBOUND @userId rates // eg. userid = Users/1 GRAPH 'movie-knowledge-graph'  LET userA_ratings = edge.rating //TO_NUMBER(edge.ratings)  FOR userB, edge2 IN 1..1 INBOUND movie rates  FILTER userB._id != @userId  LET userB_ratings = edge2.rating //TO_NUMBER(edge2.ratings)  COLLECT userids=userB._id INTO g KEEP userB_ratings, userA_ratings  LET userA_len = SQRT(SUM (FOR r IN g[*].userA_ratings RETURN r*r))  LET userB_len = SQRT(SUM (FOR r IN g[*].userB_ratings RETURN r*r))  LET dot_product = SUM (FOR n IN 0..(LENGTH(g[*].userA_ratings) - 1) RETURN g[n].userA_ratings * g[n].userB_ratings)  LET cos_sim = dot_product/ (userA_len * userB_len)  SORT cos_sim DESC LIMIT @similarUserLimit  RETURN {userBs: userids,  cosine_similarity: cos_sim}  )  LET userA_RatedMovies = (FOR movie, edge IN 1..1 OUTBOUND @userId rates RETURN movie._key)  FOR userB in similarUsers  FOR movie ,ratesEdge IN 1..1 OUTBOUND userB.userBs rates   FILTER movie._key NOT IN userA_RatedMovies  COLLECT userA_UnratedMovie = movie  AGGREGATE ratingSum = SUM(ratesEdge.rating)   SORT ratingSum DESC  LIMIT ${movieRecommendationLimit}  RETURN {movie: userA_UnratedMovie, score : ratingSum}</p>",
           "queryName": "recommendMoviesCollaborativeFilteringAQL"
-        },
-        {
-          "name": "ML Embeddings Recommendation",
-          "shortDescription": `This is an implementation using matrix factorization. The model uses Matrix Factorization to compute similarity...`,
-          "description": `
-          This is an implementation using matrix factorization. The model uses Matrix Factorization to compute similarity between movies and similarity between users.
-          
-          An AQL query retrieves user ratings on movies from the Movie Knowledge Graph for machine learning.The similarity between each movie is computed using Matrix Factorization and FAISS to compute the top movie similarities.  The movie similarities are communicated as inferences to the Movie Knowledge Graph as similar movie edges with a similarity score.
-
-          An AQL query then finds the most highly rated movies by the given user (user-a) and then uses the movie similarity inference to compute the set of movies most like the highest rated movies from user-a.
-          `,
-          "aqlQuery":"<p>  WITH Movie, User, rates  LET similarUsers =  (FOR movie, edge IN 1 OUTBOUND @userId rates // eg. userid = Users/1 GRAPH 'movie-knowledge-graph'  LET userA_ratings = edge.rating //TO_NUMBER(edge.ratings)  FOR userB, edge2 IN 1..1 INBOUND movie rates  FILTER userB._id != @userId  LET userB_ratings = edge2.rating //TO_NUMBER(edge2.ratings)  COLLECT userids=userB._id INTO g KEEP userB_ratings, userA_ratings  LET userA_len = SQRT(SUM (FOR r IN g[*].userA_ratings RETURN r*r))  LET userB_len = SQRT(SUM (FOR r IN g[*].userB_ratings RETURN r*r))  LET dot_product = SUM (FOR n IN 0..(LENGTH(g[*].userA_ratings) - 1) RETURN g[n].userA_ratings * g[n].userB_ratings)  LET cos_sim = dot_product/ (userA_len * userB_len)  SORT cos_sim DESC LIMIT @similarUserLimit  RETURN {userBs: userids,  cosine_similarity: cos_sim}  )  LET userA_RatedMovies = (FOR movie, edge IN 1..1 OUTBOUND @userId rates RETURN movie._key)  FOR userB in similarUsers  FOR movie ,ratesEdge IN 1..1 OUTBOUND userB.userBs rates   FILTER movie._key NOT IN userA_RatedMovies  COLLECT userA_UnratedMovie = movie  AGGREGATE ratingSum = SUM(ratesEdge.rating)   SORT ratingSum DESC  LIMIT ${movieRecommendationLimit}  RETURN {movie: userA_UnratedMovie, score : ratingSum}</p>",
-          "queryName": "recommendMoviesContentBasedML"
         },
         {
           "name": "Content Based ML Recommendations",
@@ -73,6 +62,19 @@ const store = createStore({
            FILTER DOCUMENT(recommendedMovie)!=null//Temp Work-around while determine cause of nulls<br>
            LIMIT @movieRecommendationLimit<br>
            RETURN {movie : DOCUMENT(recommendedMovie) , score : aggregateScore}</p>`,
+          "queryName": "recommendMoviesContentBasedML"
+        },
+        {
+          "name": "ML Embeddings Recommendation",
+          "shortDescription": `This is an implementation using matrix factorization. The model uses Matrix Factorization to compute similarity...`,
+          "description": `
+          This is an implementation using matrix factorization. The model uses Matrix Factorization to compute similarity between movies and similarity between users.
+          
+          An AQL query retrieves user ratings on movies from the Movie Knowledge Graph for machine learning.The similarity between each movie is computed using Matrix Factorization and FAISS to compute the top movie similarities.  The movie similarities are communicated as inferences to the Movie Knowledge Graph as similar movie edges with a similarity score.
+
+          An AQL query then finds the most highly rated movies by the given user (user-a) and then uses the movie similarity inference to compute the set of movies most like the highest rated movies from user-a.
+          `,
+          "aqlQuery":"<p>  WITH Movie, User, rates  LET similarUsers =  (FOR movie, edge IN 1 OUTBOUND @userId rates // eg. userid = Users/1 GRAPH 'movie-knowledge-graph'  LET userA_ratings = edge.rating //TO_NUMBER(edge.ratings)  FOR userB, edge2 IN 1..1 INBOUND movie rates  FILTER userB._id != @userId  LET userB_ratings = edge2.rating //TO_NUMBER(edge2.ratings)  COLLECT userids=userB._id INTO g KEEP userB_ratings, userA_ratings  LET userA_len = SQRT(SUM (FOR r IN g[*].userA_ratings RETURN r*r))  LET userB_len = SQRT(SUM (FOR r IN g[*].userB_ratings RETURN r*r))  LET dot_product = SUM (FOR n IN 0..(LENGTH(g[*].userA_ratings) - 1) RETURN g[n].userA_ratings * g[n].userB_ratings)  LET cos_sim = dot_product/ (userA_len * userB_len)  SORT cos_sim DESC LIMIT @similarUserLimit  RETURN {userBs: userids,  cosine_similarity: cos_sim}  )  LET userA_RatedMovies = (FOR movie, edge IN 1..1 OUTBOUND @userId rates RETURN movie._key)  FOR userB in similarUsers  FOR movie ,ratesEdge IN 1..1 OUTBOUND userB.userBs rates   FILTER movie._key NOT IN userA_RatedMovies  COLLECT userA_UnratedMovie = movie  AGGREGATE ratingSum = SUM(ratesEdge.rating)   SORT ratingSum DESC  LIMIT ${movieRecommendationLimit}  RETURN {movie: userA_UnratedMovie, score : ratingSum}</p>",
           "queryName": "recommendMoviesEmbeddingML"
         }
       ],
@@ -96,9 +98,10 @@ const store = createStore({
   },
   actions : {
     recommendMoviesCollaborativeFilteringAQL({commit, state}) {
+      commit('loading', true);
       commit('queryInfo', 0)
       axios({
-        url: 'http://localhost:8529/_db/movie-demo/ml-demo',
+        url: `${state.APIURL}`,
         auth: {
           username: "root",
           password: "openSesame"
@@ -116,6 +119,7 @@ const store = createStore({
                 voteAverage
                 originalLanguage
                 movieId: id
+                tmdbId
               }
               score
             }
@@ -123,7 +127,6 @@ const store = createStore({
           `
         }
       }).then((result) => {
-        commit('loading', true);
         commit('userRecommendationUpdate', result.data.data.recommendMoviesCollaborativeFilteringAQL);
         // context.commit('updateGenres', [])
       })
@@ -132,17 +135,20 @@ const store = createStore({
       })
       .then(() => {
         commit('updateAvailableLanguages');
-        
+        commit('getPosters');
       })
       .then(() => {
-        commit('loading', false);
+          commit('loading', false);
+      }).catch(e => {
+        state.APIRESPONSE = e.response.status
       })
     },
     recommendMoviesContentBasedML({commit, state}, user) {
+      commit('loading', true);
       
       commit('queryInfo', 1);
       axios({
-        url: 'http://localhost:8529/_db/movie-demo/ml-demo',
+        url: `${state.APIURL}`,
         method: 'post',
         data: {
           query: `
@@ -156,6 +162,7 @@ const store = createStore({
                 voteAverage
                 originalLanguage
                 movieId: id
+                tmdbId
               }
               score
             }
@@ -163,7 +170,6 @@ const store = createStore({
           `
         }
       }).then((result) => {
-        commit('loading', true);
         commit('userRecommendationUpdate', result.data.data.recommendMoviesContentBasedML, user ? user : '');        
       })
       .then(() => {
@@ -171,15 +177,20 @@ const store = createStore({
       })
       .then(() => {
         commit('updateAvailableLanguages');
+        commit('getPosters');
+
       })
       .then(() => {
-        commit('loading', false);
+          commit('loading', false);
+      }).catch(e => {
+        state.APIRESPONSE = e.response.status
       })
     },
     recommendMoviesEmbeddingML({commit, state}, user) {
+      commit('loading', true);
       commit('queryInfo', 2);
       axios({
-        url: 'http://localhost:8529/_db/movie-demo/ml-demo',
+        url: `${state.APIURL}`,
         method: 'post',
         data: {
           query: `
@@ -193,6 +204,7 @@ const store = createStore({
                 voteAverage
                 originalLanguage
                 movieId: id
+                tmdbId
               }
               score
             }
@@ -200,7 +212,6 @@ const store = createStore({
           `
         }
       }).then((result) => {
-        commit('loading', true);
         commit('userRecommendationUpdate', result.data.data.recommendMoviesEmbeddingML, user ? user : '');
 
       })
@@ -209,26 +220,63 @@ const store = createStore({
       })
       .then(() => {
         commit('updateAvailableLanguages');
+        commit('getPosters');
       })
       .then(() => {
-        commit('loading', false);
+            commit('loading', false);        
+      }).catch(e => {
+        state.APIRESPONSE = e.response.status
       })
     },
     updateUser(context, user) {
+      context.commit('loading', true);        
         context.commit('changeUser', user)
         context.state.queryInfo ? context.dispatch((context.state.queryInfo[context.state.currentQuery].queryName).toString(), user) : ''
+        context.commit('loading', false);        
     },
     updateSelectedLanguagesAction(context, langs) {
       context.commit('updateSelectedLanguages', langs)
     },
-    explainerAction({commit, state}) {
+    explainerAction({commit, state}, movieId) {
+      commit('loading', true)
 
       state.openExplainer == true ? commit("toggleExplainer") : (
-        commit("explainerQueryMutation"),
-          // commit("updateExplainerResult",state.result.data.data['explainRecommendMoviesEmbeddingML']);
+        commit("explainerQueryMutation", movieId),
+          // commit("updateExplainerResult",state.result.data.data['explainRecommendMoviesEmbeddingML']),
         commit("toggleExplainer")
         // commit("updateExplainerResult", result.data.data[(state.queryInfo[state.currentQuery].queryName).toString()])
-      )
+        )
+          commit('loading', false);
+    },
+    async setAPIURL({commit, dispatch,state}, url) {
+      // commit('loading', true)
+      await commit('updateAPIURL', url);
+      axios({
+        url: `${state.APIURL}`,
+        method: 'post',
+        data: {
+          query: `
+          query {
+            allMovies (limit: 1) {
+              id
+            }
+          }
+          `
+      }
+    }).then((result) => {
+      state.APIRESPONSE = result.status;
+      state.APIRESPONSE == 200 ? commit('updateRecommendationDescriptions') : commit('loading', false)
+      state.APIRESPONSE == 200 ? dispatch('recommendMoviesContentBasedML') : commit('loading', false)
+
+    })
+    .then(() => {
+      commit('loading', false)
+    })
+    .catch(e => {
+      commit('loading', false)
+      state.APIRESPONSE = e.response.status
+    })
+      
     }
   },
   mutations: {
@@ -236,7 +284,13 @@ const store = createStore({
       state.count++
     },
     loading (state, load) {
+      if (load == false) {
+        setTimeout(() => {
+        state.loadingData = load;
+      }, 500)
+    } else {
       state.loadingData = load;
+    }
     },
     updateGenres (state, genres) {
       state.selectedGenres = genres;
@@ -295,14 +349,15 @@ const store = createStore({
     updateExplainerResult(state, result) {
       state.explainerResult = result
     },
-    explainerQueryMutation(state) {
+    explainerQueryMutation(state, movieId) {
+      let explainMethod = "explain" + ((state.queryInfo[state.currentQuery].queryName).toString()[0].toUpperCase()+(state.queryInfo[state.currentQuery].queryName).toString().slice(1))
         axios({
-          url: 'http://localhost:8529/_db/movie-demo/ml-demo',
+          url: `${state.APIURL}`,
           method: 'post',
           data: {
             query: `
             query {
-              explainRecommendMoviesEmbeddingML (pathLimit: 12) {
+              ${explainMethod} (pathLimit: 12, movieId: "${movieId}", userId: "User/${state.user}") {
                 vertices {
                   ...on Movie {
                     movieId: id
@@ -320,19 +375,67 @@ const store = createStore({
                   id
                   source: from
                   target: to
+                  distance
                 }
               }
             }
             `
           }
         }).then((result) => {
-          state.explainerResult = result.data.data['explainRecommendMoviesEmbeddingML']
+          state.explainerResult = result.data.data[explainMethod]
+        }).catch(e => {
+          state.APIRESPONSE = e.response.status
         })
     },
     toggleExplainer(state) {
       state.openExplainer = !state.openExplainer;
-    }
+    },
+    updateAPIURL(state, url) {
+      state.APIURL = url;
+    },
+    getPosters(state) {
+      state.recommendations.forEach((m, i) => {
+        axios({
+        url: `https://api.themoviedb.org/3/movie/${m.movie.tmdbId}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US`,
+        method: 'get'
+        })
+        .then((result) => {
+          state.recommendations[i].movie.posterPath = "https://image.tmdb.org/t/p/w500/" + result.data.poster_path
+        })
+      })
+  },
+  async updateRecommendationDescriptions(state) {
+    axios({
+      url: `${state.APIURL}`,
+      method: 'post',
+      data: {
+        query: `
+        query {
+          allModels {
+            name
+            description
+            query
+            components
+            notebook
+          }
+        }
+        `}
+      })
+      .then((result) => {
+        state.queryInfo.forEach((x, i) => {
+          
+          result.data.data.allModels.forEach((m) => {
+            m.name == x.queryName ? (
+              state.queryInfo[i].description = m.description, 
+              state.queryInfo[i].aqlQuery = m.query, 
+              state.queryInfo[i].components = m.components,
+              state.queryInfo[i].notebook = m.notebook
+              ) : ''
+          })
+        })
+      })
   }
+}
 });
 
 export default store;
