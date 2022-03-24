@@ -134,7 +134,7 @@ export default {
 
               vert.id = vert.movieId ? vert.movieId : vert.userId
             vert.movieId ? '' : vObj.classes = 'userVertex'
-            vert.label = vert.title ? vert.title : vert.id
+            vert.label = vert.title ? vert.title : vert.name
             
             Object.assign(vObj['data'],vert)
             this.graphNodes.push(vObj)

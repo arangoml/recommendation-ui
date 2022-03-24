@@ -41,9 +41,9 @@ export default {
         "Alex",
         "Naomi",
         "Grace",
-        "Oliver",
-        "Mathias",
-        "Lupen"
+        "Odo",
+        "Martok",
+        "Lore"
       ],
       colors: []
     }
