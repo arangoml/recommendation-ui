@@ -8,11 +8,19 @@
         <h2>Please paste your ArangoDB Oasis Endpoint here.</h2>
         <span class="p-float-label">
             <h5>Enter Movie Demo GraphQL Endpoint URL</h5>
-            <InputText id="APIURL" type="text" v-model="API_URL" />
+            <InputText id="APIURL" type="text" v-model="APIDATA.API_URL" />
+        </span>
+        <span class="p-float-label">
+            <h5>Enter ArangoDB Movie Demo Database Username</h5>
+            <InputText id="APIUSERNAME" type="text" v-model="APIDATA.API_USERNAME" />
+        </span>
+        <span class="p-float-label">
+            <h5>Enter ArangoDB Movie Demo Database Password</h5>
+            <InputText id="APIPASSWORD" type="text" v-model="APIDATA.API_PASSWORD" />
         </span>
         <p class="errorResponse" >{{ APIRESPONSE > 399 ? 'Invalid URL or issue with GraphQL Endpoint' : ''  }}</p>
     </div>
-    <Button @click="setAPI(API_URL)" > Submit </Button>
+    <Button @click="setAPI(APIDATA.API_URL, APIDATA.API_USERNAME, APIDATA.API_PASSWORD)" > Submit </Button>
         <p><a class="oasisLink" href="https://www.arangodb.com/docs/stable/oasis/getting-started.html#get-a-deployment-up-and-running">Click here for instructions on setting up your first deployment and installing the movie recommendation example on Oasis.</a></p>
     <div class="oasisBanner">
         <h2>This demo runs on ArangoDB Oasis</h2>
@@ -33,7 +41,11 @@ export default {
     data() {
         return {
             hide: true,
-            API_URL: new URL(location.href).searchParams.get('OasisURL')
+            APIDATA: {
+                API_URL: new URL(location.href).searchParams.get('OasisURL'),
+                API_USERNAME: new URL(location.href).searchParams.get('OasisUSERNAME'),
+                API_PASSWORD: new URL(location.href).searchParams.get('OasisPASSWORD')
+            }
         }
     },
   computed: {
@@ -45,9 +57,9 @@ export default {
       ...mapActions([
          'setAPIURL' 
       ]),
-      async setAPI(API_URL) {
+      async setAPI() {
         //   this.$store.commit('loading', true)
-          await this.setAPIURL(API_URL)
+          await this.setAPIURL(this.APIDATA)
         //   this.$store.commit('loading', false)
 
 

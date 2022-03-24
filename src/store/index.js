@@ -8,6 +8,8 @@ const store = createStore({
   state () {
     return {
       APIURL: "http://localhost:8080",
+      APIUSERNAME: 'recommend',
+      APIPASSWORD: 'recommend',
       APIRESPONSE: 0,
       count: 0,
       recommendations: [{movie: 79132, title: "Inception", ratingSum : 158.5}],
@@ -103,8 +105,8 @@ const store = createStore({
       axios({
         url: `${state.APIURL}`,
         auth: {
-          username: "root",
-          password: "openSesame"
+          username: state.APIUSERNAME,
+          password: state.APIPASSWORD
         },
         method: 'post',
         data: {
@@ -149,6 +151,10 @@ const store = createStore({
       commit('queryInfo', 1);
       axios({
         url: `${state.APIURL}`,
+        auth: {
+          username: state.APIUSERNAME,
+          password: state.APIPASSWORD
+        },
         method: 'post',
         data: {
           query: `
@@ -191,6 +197,10 @@ const store = createStore({
       commit('queryInfo', 2);
       axios({
         url: `${state.APIURL}`,
+        auth: {
+          username: state.APIUSERNAME,
+          password: state.APIPASSWORD
+        },
         method: 'post',
         data: {
           query: `
@@ -248,11 +258,15 @@ const store = createStore({
         )
           commit('loading', false);
     },
-    async setAPIURL({commit, dispatch,state}, url) {
-      // commit('loading', true)
-      await commit('updateAPIURL', url);
+    async setAPIURL({commit, dispatch,state}, APIDATA) {
+      await commit('setCredentials', APIDATA)
+      await commit('updateAPIURL', APIDATA.API_URL);
       axios({
         url: `${state.APIURL}`,
+        auth: {
+          username: state.APIUSERNAME,
+          password: state.APIPASSWORD
+        },
         method: 'post',
         data: {
           query: `
@@ -353,6 +367,10 @@ const store = createStore({
       let explainMethod = "explain" + ((state.queryInfo[state.currentQuery].queryName).toString()[0].toUpperCase()+(state.queryInfo[state.currentQuery].queryName).toString().slice(1))
         axios({
           url: `${state.APIURL}`,
+                  auth: {
+          username: state.APIUSERNAME,
+          password: state.APIPASSWORD
+        },
           method: 'post',
           data: {
             query: `
@@ -407,6 +425,10 @@ const store = createStore({
   async updateRecommendationDescriptions(state) {
     axios({
       url: `${state.APIURL}`,
+      auth: {
+        username: state.APIUSERNAME,
+        password: state.APIPASSWORD
+      },
       method: 'post',
       data: {
         query: `
@@ -434,6 +456,10 @@ const store = createStore({
           })
         })
       })
+  },
+  async setCredentials(state, APIDATA) {
+    state.APIUSERNAME = APIDATA.API_USERNAME;
+    state.APIPASSWORD = APIDATA.API_PASSWORD;
   }
 }
 });
