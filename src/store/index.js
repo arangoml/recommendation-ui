@@ -258,9 +258,9 @@ const store = createStore({
         )
           commit('loading', false);
     },
-    async setAPIURL({commit, dispatch,state}, url) {
-      // commit('loading', true)
-      await commit('updateAPIURL', url);
+    async setAPIURL({commit, dispatch,state}, APIDATA) {
+      await commit('setCredentials', APIDATA)
+      await commit('updateAPIURL', APIDATA.API_URL);
       axios({
         url: `${state.APIURL}`,
         auth: {
@@ -456,6 +456,10 @@ const store = createStore({
           })
         })
       })
+  },
+  async setCredentials(state, APIDATA) {
+    state.APIUSERNAME = APIDATA.API_USERNAME;
+    state.APIPASSWORD = APIDATA.API_PASSWORD;
   }
 }
 });

@@ -129,7 +129,12 @@ export default {
   },
   async mounted() {
     this.loading(false)
-    await this.setAPIURL(new URL(location.href).searchParams.get('OasisURL'))
+    const APIDATA = {
+      API_URL: new URL(location.href).searchParams.get('OasisURL'),
+      API_USERNAME: new URL(location.href).searchParams.get('OasisUSERNAME'),
+      API_PASSWORD: new URL(location.href).searchParams.get('OasisPASSWORD')
+    }
+    await this.setAPIURL(APIDATA)
   }
 };
 </script>
