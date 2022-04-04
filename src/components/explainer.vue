@@ -64,6 +64,13 @@ export default {
               }
             },
             {
+            selector: '.clickedMovie', // but this does,
+            style: {
+              // 'label': 'data(label)',
+              'background-color': '#555555'
+              }
+            },
+            {
 
             selector: 'edge',
             style: {
@@ -86,6 +93,7 @@ export default {
     computed: {
     ...mapState({
         openExplainer: state => state.openExplainer,
+        explainerMovie: state => state.explainerMovie,
         explainerResult: state => state.explainerResult
     }),
     },
@@ -133,7 +141,7 @@ export default {
             if(vert != null) {
 
               vert.id = vert.movieId ? vert.movieId : vert.userId
-            vert.movieId ? '' : vObj.classes = 'userVertex'
+            vert.movieId ? (vert.movieId == this.explainerMovie ? vObj.classes = 'clickedMovie' : ''): vObj.classes = 'userVertex'
             vert.label = vert.title ? vert.title : vert.name
             
             Object.assign(vObj['data'],vert)
