@@ -90,6 +90,7 @@ const store = createStore({
       selectedRating: 0,
       languages: [],
       openExplainer: false,
+      explainerMovie: 'Movie/False',
       explainerResult: []
     }
   },
@@ -364,6 +365,7 @@ const store = createStore({
       state.explainerResult = result
     },
     explainerQueryMutation(state, movieId) {
+      state.explainerMovie = movieId;
       let explainMethod = "explain" + ((state.queryInfo[state.currentQuery].queryName).toString()[0].toUpperCase()+(state.queryInfo[state.currentQuery].queryName).toString().slice(1))
         axios({
           url: `${state.APIURL}`,

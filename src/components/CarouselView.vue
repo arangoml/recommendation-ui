@@ -23,8 +23,8 @@
                             </div>
                         </div>
                             <h4 class="p-mb-1">{{slotProps.data.movie.title}}</h4>
-                            <h6 class="p-mt-0 p-mb-3">Average User Rating: {{slotProps.data.movie.voteAverage}}</h6>
-                            <h6 class="p-mt-0 p-mb-3">Recommendation Score: {{slotProps.data.score}}</h6>
+                            <h6 class="p-mt-0 p-mb-3 subtext">Average User Rating: {{slotProps.data.movie.voteAverage}}</h6>
+                            <h6 class="p-mt-0 p-mb-3 subtext">Recommendation Score: {{slotProps.data.score}}</h6>
                       
                     </div>
                 </transition>
@@ -177,6 +177,9 @@ export default {
   }
 .avocadoButton {
   background-color: rgba(0, 128, 0, 0);
+}
+.subtext {
+  font-size: .8em;
 }
 
 </style>
