@@ -349,6 +349,7 @@ const store = createStore({
             notebook
             recommend
             explain
+            label
           }
         }
         `}

@@ -9,7 +9,7 @@
         <h2>Recommendation Method</h2>
         <div style="margin-top: .5em;" class="p-d-flex p-flex-row p-jc-center recommendation-preference-row">
           <div class="p-mr-2">
-            <Button v-for="query, index in queryInfo" :key="index" v-on:click="this.$store.dispatch('recommendMoviesAction', {user: user, query: queryInfo[index].recommend.toString(), index: index})" :class="currentQuery == index ? 'selectedButton' : ''" class="rec-pref-button" :label="queryInfo[index].name" />
+            <Button v-for="query, index in queryInfo" :key="index" v-on:click="this.$store.dispatch('recommendMoviesAction', {user: user, query: queryInfo[index].recommend.toString(), index: index})" :class="currentQuery == index ? 'selectedButton' : ''" class="rec-pref-button" :label="queryInfo[index].label" />
           </div>
         </div>
     <h2>Who's watching?</h2>
