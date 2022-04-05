@@ -99,7 +99,8 @@ export default {
           return computedSortedGenres.length == 0 ? state.sortedGenres : computedSortedGenres
         },
         selectedRating: state => state.selectedRating,
-        openExplainer: state => state.openExplainer
+        openExplainer: state => state.openExplainer,
+        currentQuery: state => state.currentQuery
       }),
     filteredRecommendations: function() {
       return function(genre){
@@ -125,7 +126,7 @@ export default {
   },
   methods: {
     ...mapActions({
-    recommendMoviesContentBasedML: 'recommendMoviesContentBasedML',
+    recommendMoviesAction: 'recommendMoviesAction',
     explainerAction: 'explainerAction'
     }),
     toggleCard: function(movie) {
@@ -136,8 +137,8 @@ export default {
     }
       
   },
-  created: function() {
-      this.recommendMoviesContentBasedML();
+  mounted(){
+      this.recommendMoviesAction({query: 'recommendMoviesCollaborativeFilteringAQL', user: 0, index: 0});
   }
 }
 </script>
