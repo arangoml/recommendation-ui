@@ -350,6 +350,12 @@ const store = createStore({
             recommend
             explain
             label
+            resources {
+              url
+              description
+              title
+              image
+            }
           }
         }
         `}

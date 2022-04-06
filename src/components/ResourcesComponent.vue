@@ -1,12 +1,19 @@
 <template>
   <div class="resourcesContainer">
       <h2>Resources</h2>
+      <p v-if="!expanded">Explore the resources section for links to the notebooks we used to generate the recommendations, relevant papers, datasets, and more.</p>
+      <div v-if="expanded">
       <p>
-          You can see how we generated the analytical data for this in the following notebook:
-          <a :href="queryInfo.notebook">
-          <img src="https://colab.research.google.com/assets/colab-badge.svg" />
-          </a>
+          Use these resources to learn more about how we generated these recommendations.
       </p>
+          <div v-for="resources, index in queryInfo.resources" :key="index">
+              <h2> {{resources.title}} </h2>
+              <p> {{ resources.description}} </p>
+              <p><a :href=resources.url >Link to {{resources.title}}</a> </p>
+              <p v-if="resources.image"><img :src="resources.image" /></p>
+              <br>
+      </div>
+      </div>
       <p v-if="!expanded" >
       ...expand for more
       </p>

@@ -90,3 +90,6 @@ border: 1px solid var(--surface-border);
     padding: 4px;
     border: 1px solid var(--secondary-button-accent);
 }
+body a {
+    color: var(--arangodb-icons-a);
+}
