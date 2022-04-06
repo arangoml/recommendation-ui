@@ -1,8 +1,8 @@
 <template>
   <div>
-      <h2>{{ queryInfo.name }}</h2>
+      <h2>{{ queryInfo.label }}</h2>
       <p>Concepts used: <span v-for="c in queryInfo.components" :key="c">{{ c }}, </span></p>
-      <p v-if="!expanded" style="white-space: pre-wrap;">{{queryInfo.shortDescription}}</p>
+      <p v-if="!expanded" style="white-space: pre-wrap;">{{queryInfo.description.slice(0, 100)}}...</p>
 <transition name="fade-from-top">
       <div v-if="expanded" >
       <p style="white-space: pre-wrap;">{{ queryInfo.description}}</p>

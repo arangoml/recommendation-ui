@@ -100,9 +100,9 @@ const store = createStore({
     }
   },
   actions : {
-    recommendMoviesCollaborativeFilteringAQL({commit, state}) {
+    recommendMoviesAction({commit, state}, data) {
       commit('loading', true);
-      commit('queryInfo', 0)
+      commit('queryInfo', data.index);
       axios({
         url: `${state.APIURL}`,
         auth: {
@@ -113,7 +113,7 @@ const store = createStore({
         data: {
           query: `
           query {
-            recommendMoviesCollaborativeFilteringAQL(userId: "User/${state.user}", similarUserLimit: ${25}, movieRecommendationLimit: ${100}) {
+            ${data.query}(userId: "User/${state.user}", expansionLimit: 100, movieRecommendationLimit: 100) {
               movie {
                 title
                 posterPath
@@ -130,101 +130,7 @@ const store = createStore({
           `
         }
       }).then((result) => {
-        commit('userRecommendationUpdate', result.data.data.recommendMoviesCollaborativeFilteringAQL);
-        // context.commit('updateGenres', [])
-      })
-      .then(() => {
-        commit('updateTopGenres');
-      })
-      .then(() => {
-        commit('updateAvailableLanguages');
-        commit('getPosters');
-      })
-      .then(() => {
-          commit('loading', false);
-      }).catch(e => {
-        state.APIRESPONSE = e.response.status
-      })
-    },
-    recommendMoviesContentBasedML({commit, state}, user) {
-      commit('loading', true);
-      
-      commit('queryInfo', 1);
-      axios({
-        url: `${state.APIURL}`,
-        auth: {
-          username: state.APIUSERNAME,
-          password: state.APIPASSWORD
-        },
-        method: 'post',
-        data: {
-          query: `
-          query {
-            recommendMoviesContentBasedML(userId: "User/${state.user}", topRatedMovieLimit: 100, movieRecommendationLimit: 100) {
-              movie {
-                title
-                posterPath
-                overview
-                genres
-                voteAverage
-                originalLanguage
-                movieId: id
-                tmdbId
-              }
-              score
-            }
-          }
-          `
-        }
-      }).then((result) => {
-        commit('userRecommendationUpdate', result.data.data.recommendMoviesContentBasedML, user ? user : '');        
-      })
-      .then(() => {
-        commit('updateTopGenres');
-      })
-      .then(() => {
-        commit('updateAvailableLanguages');
-        commit('getPosters');
-
-      })
-      .then(() => {
-          commit('loading', false);
-      }).catch(e => {
-        state.APIRESPONSE = e.response.status
-      })
-    },
-    recommendMoviesEmbeddingML({commit, state}, user) {
-      commit('loading', true);
-      commit('queryInfo', 2);
-      axios({
-        url: `${state.APIURL}`,
-        auth: {
-          username: state.APIUSERNAME,
-          password: state.APIPASSWORD
-        },
-        method: 'post',
-        data: {
-          query: `
-          query {
-            recommendMoviesEmbeddingML(userId: "User/${state.user}", topRatedMovieLimit: 100, movieRecommendationLimit: 100) {
-              movie {
-                title
-                posterPath
-                overview
-                genres
-                voteAverage
-                originalLanguage
-                movieId: id
-                tmdbId
-              }
-              score
-            }
-          }
-          `
-        }
-      }).then((result) => {
-        commit('userRecommendationUpdate', result.data.data.recommendMoviesEmbeddingML, user ? user : '');
-
+        commit('userRecommendationUpdate', result.data.data[data.query], data.user ? data.user : '');
       })
       .then(() => {
         commit('updateTopGenres');
@@ -242,7 +148,7 @@ const store = createStore({
     updateUser(context, user) {
       context.commit('loading', true);        
         context.commit('changeUser', user)
-        context.state.queryInfo ? context.dispatch((context.state.queryInfo[context.state.currentQuery].queryName).toString(), user) : ''
+        context.state.queryInfo ? context.dispatch('recommendMoviesAction', {query: context.state.queryInfo[context.state.currentQuery].recommend.toString(), user: user, index: context.state.currentQuery}) : ''
         context.commit('loading', false);        
     },
     updateSelectedLanguagesAction(context, langs) {
@@ -281,7 +187,7 @@ const store = createStore({
     }).then((result) => {
       state.APIRESPONSE = result.status;
       state.APIRESPONSE == 200 ? commit('updateRecommendationDescriptions') : commit('loading', false)
-      state.APIRESPONSE == 200 ? dispatch('recommendMoviesContentBasedML') : commit('loading', false)
+      state.APIRESPONSE == 200 ? dispatch('recommendMoviesAction', {query: 'recommendMoviesCollaborativeFilteringAQL', user: 0, index: 0}) : commit('loading', false)
 
     })
     .then(() => {
@@ -366,7 +272,7 @@ const store = createStore({
     },
     explainerQueryMutation(state, movieId) {
       state.explainerMovie = movieId;
-      let explainMethod = "explain" + ((state.queryInfo[state.currentQuery].queryName).toString()[0].toUpperCase()+(state.queryInfo[state.currentQuery].queryName).toString().slice(1))
+      let explainMethod = state.queryInfo[state.currentQuery].explain.toString()
         axios({
           url: `${state.APIURL}`,
                   auth: {
@@ -377,7 +283,7 @@ const store = createStore({
           data: {
             query: `
             query {
-              ${explainMethod} (pathLimit: 12, movieId: "${movieId}", userId: "User/${state.user}") {
+              ${explainMethod} (pathLimit: 7, movieId: "${movieId}", userId: "User/${state.user}") {
                 vertices {
                   ...on Movie {
                     movieId: id
@@ -441,22 +347,21 @@ const store = createStore({
             query
             components
             notebook
+            recommend
+            explain
+            label
+            resources {
+              url
+              description
+              title
+              image
+            }
           }
         }
         `}
       })
       .then((result) => {
-        state.queryInfo.forEach((x, i) => {
-          
-          result.data.data.allModels.forEach((m) => {
-            m.name == x.queryName ? (
-              state.queryInfo[i].description = m.description, 
-              state.queryInfo[i].aqlQuery = m.query, 
-              state.queryInfo[i].components = m.components,
-              state.queryInfo[i].notebook = m.notebook
-              ) : ''
-          })
-        })
+        state.queryInfo = result.data.data.allModels
       })
   },
   async setCredentials(state, APIDATA) {

@@ -9,7 +9,7 @@
         <h2>Recommendation Method</h2>
         <div style="margin-top: .5em;" class="p-d-flex p-flex-row p-jc-center recommendation-preference-row">
           <div class="p-mr-2">
-            <Button v-for="query, index in queryInfo" :key="index" v-on:click="this.$store.dispatch(queryInfo[index].queryName.toString(), user)" :class="currentQuery == index ? 'selectedButton' : ''" class="rec-pref-button" :label="queryInfo[index].name" />
+            <Button v-for="query, index in queryInfo" :key="index" v-on:click="this.$store.dispatch('recommendMoviesAction', {user: user, query: queryInfo[index].recommend.toString(), index: index})" :class="currentQuery == index ? 'selectedButton' : ''" class="rec-pref-button" :label="queryInfo[index].label" />
           </div>
         </div>
     <h2>Who's watching?</h2>
@@ -64,23 +64,9 @@ export default {
       },
       ...mapActions({
       userRecommendation: 'userRecommendation',
-      recommendMoviesCollaborativeFilteringAQL: 'recommendMoviesCollaborativeFilteringAQL',
-      recommendMoviesContentBasedML: 'recommendMoviesContentBasedML',
-      recommendMoviesEmbeddingML: 'recommendMoviesEmbeddingML',
       updateUser: 'updateUser'
       }),
-      generateRandomColor(){
-      let maxVal = 0xFFFFFF; // 16777215
-      let randomNumber = Math.random() * maxVal; 
-      randomNumber = Math.floor(randomNumber);
-      randomNumber = randomNumber.toString(16);
-      let randColor = randomNumber.padStart(6, 0);   
-      return `#${randColor.toUpperCase()}`
-    } 
     },
-  beforeMount() {
-    this.colors.push(this.generateRandomColor())
-  },
 }
 </script>
 
