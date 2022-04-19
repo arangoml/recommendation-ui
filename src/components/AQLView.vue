@@ -7,7 +7,8 @@
     <p v-show="expanded">See the panel to the right to learn more.</p>
     <transition name="fade-from-top">
     <div class="p-grid p-jc-center aql-code" v-show="expanded">
-      <pre><span v-html="queryInfo[currentQuery].query"></span></pre>
+
+      <pre><span v-html="aqlQuery"></span></pre>
       
       <div class="aql-details p-row-1">
       
@@ -25,10 +26,15 @@ export default {
   computed: {
         ...mapState({
             queryInfo: state => state.queryInfo,
-            currentQuery: state => state.currentQuery
+            currentQuery: state => state.currentQuery,
+            aqlQuery: (state) => {
+              return state.queryInfo[state.currentQuery].query
+              }
         }),
+
   },
   methods: {
+    
   },
   created: function() {
   },
@@ -44,5 +50,7 @@ export default {
 <style scoped>
 pre {
       white-space: pre-wrap; /* CSS3 */
+      text-align: left;
+      margin-left: 50px;
 }
 </style>
