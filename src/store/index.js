@@ -46,7 +46,6 @@ const store = createStore({
     recommendMoviesAction({commit, state}, data) {
       commit('loading', true);
       commit('queryInfo', data.index);
-      console.log(data.query)
       axios({
         url: `${state.APIURL}`,
         auth: {
