@@ -1,7 +1,9 @@
-# watchacados
+# ArangoFlix
+
+Please see: [https://github.com/arangoml/recommendation-demo](https://github.com/arangoml/recommendation-demo) for full setup instructions
 
 ### Docker
-Now dockerized: `docker run -it -p 80:80 --name ArangoFlix cw00dw0rd/arangoml-demo-ui:latest`
+Now dockerized: `docker run -it -p 80:80 --name ArangoFlix arangoml/arangoflix:1.0`
 
 ### Foxx endpoint is required 
 This endpoint will be automatically supplied by Oasis and is using the movie dataset and the [recommendation-demo](https://github.com/arangoml/recommendation-demo) repo for the GraphQL Foxx service.
